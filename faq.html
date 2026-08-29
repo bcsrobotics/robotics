@@ -36,6 +36,28 @@
     align-items: center;
     gap: 20px;
   }
+  .lang-switch {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+    margin-left: 8px;
+    border-left: 1px solid rgba(13,27,42,0.12);
+    padding-left: 16px;
+  }
+  .lang-switch a {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 12.5px;
+    letter-spacing: 0.06em;
+    color: #9aa4ad;
+    text-decoration: none;
+    padding: 6px 8px;
+    border-radius: 4px;
+    transition: color 0.15s, background 0.15s;
+  }
+  .lang-switch a:hover { color: #2170b8; background: rgba(55,138,221,0.08); }
+  .lang-switch a.active { color: #2170b8; font-weight: 800; }
+  .lang-switch .sep { color: #d0d6db; padding: 6px 0; font-size: 12px; }
   .header-logo {
     width: 52px;
     height: 52px;
@@ -382,6 +404,11 @@
       <a href="faq.html" class="active">FAQ</a>
       <a href="contact.html">Contact</a>
     </nav>
+    <div class="lang-switch">
+      <a href="faq.html" class="active">EN</a>
+      <span class="sep">|</span>
+      <a href="faq-zh.html">中文</a>
+    </div>
   </div>
 </header>
 <div class="hero-band">
