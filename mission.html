@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Mission — BCS Robotics</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;500;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #eef1f4;
+    min-height: 100vh;
+    font-family: 'Barlow', sans-serif;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 48px 20px;
+  }
+  .page {
+    width: 840px;
+    max-width: 100%;
+    background: #ffffff;
+    position: relative;
+    overflow: hidden;
+    padding: 56px 60px 60px;
+  }
+  .bg-accent {
+    position: absolute;
+    top: -140px; right: -140px;
+    width: 480px; height: 480px;
+    background: radial-gradient(circle, rgba(55,138,221,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #378ADD;
+    margin-bottom: 6px;
+    position: relative;
+  }
+  .nav {
+    display: flex;
+    gap: 20px;
+    row-gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+    position: relative;
+  }
+  .nav a {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #566270;
+    text-decoration: none;
+    padding-bottom: 4px;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .nav a:hover,
+  .nav a.active {
+    color: #2170b8;
+    border-bottom-color: #378ADD;
+  }
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 46px;
+    color: #0d1b2a;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .divider {
+    height: 2px;
+    background: linear-gradient(90deg, #378ADD 0%, rgba(55,138,221,0.15) 60%, transparent 100%);
+    margin-bottom: 30px;
+    position: relative;
+  }
+  .mission-box {
+    background: #f4f7fa;
+    border-left: 4px solid #378ADD;
+    padding: 24px 28px;
+    margin-bottom: 40px;
+    font-size: 18px;
+    color: #2b3946;
+    line-height: 1.7;
+    font-style: italic;
+    position: relative;
+  }
+  .mission-box strong {
+    color: #2170b8;
+    font-style: normal;
+    font-size: 1.05em;
+  }
+  .spark-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 16px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #2170b8;
+    margin-bottom: 18px;
+    text-align: center;
+    position: relative;
+  }
+  .why-section {
+    margin-top: 44px;
+    position: relative;
+  }
+  .why-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    color: #0d1b2a;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    margin-bottom: 18px;
+    text-align: center;
+  }
+  .why-intro {
+    font-size: 15px;
+    color: #495563;
+    line-height: 1.7;
+    margin-bottom: 26px;
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+  .why-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .why-item {
+    display: flex;
+    gap: 16px;
+    background: #f4f7fa;
+    border-left: 3px solid #378ADD;
+    padding: 16px 20px;
+  }
+  .why-letter {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    color: #378ADD;
+    line-height: 1.3;
+    flex-shrink: 0;
+    width: 32px;
+  }
+  .why-body-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #0d1b2a;
+    margin-bottom: 4px;
+  }
+  .why-body-text {
+    font-size: 14px;
+    color: #495563;
+    line-height: 1.6;
+  }
+  .spark-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    position: relative;
+  }
+  .spark-item {
+    background: #f4f7fa;
+    border-top: 3px solid #378ADD;
+    padding: 20px 12px 22px;
+    text-align: center;
+  }
+  .spark-letter {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 42px;
+    color: #0d1b2a;
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+  .spark-letter span { color: #378ADD; }
+  .spark-word {
+    font-size: 13px;
+    color: #566270;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+  .footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 24px;
+    margin-top: 44px;
+    border-top: 1px solid rgba(13,27,42,0.1);
+    position: relative;
+  }
+  .footer-left {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    color: #7c8894;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .footer-badge {
+    background: rgba(55,138,221,0.1);
+    border: 1px solid rgba(55,138,221,0.3);
+    padding: 6px 16px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #2170b8;
+  }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .page { box-shadow: none; border: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="bg-accent"></div>
+
+  <div class="nav">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="mission.html" class="active">Mission</a>
+    <a href="programs.html">Programs</a>
+    <a href="tournaments.html">Tournaments</a>
+    <a href="faq.html">FAQ</a>
+    <a href="contact.html">Contact</a>
+  </div>
+
+  <h1 class="section-title">Our Mission</h1>
+  <div class="divider"></div>
+
+  <div class="mission-box">
+    To inspire the next generation of engineers and innovators by building real <strong>S</strong>kills through hands-on robotics, growing <strong>P</strong>ersistence through problem-solving, learning to <strong>A</strong>chieve together as a team, practicing <strong>R</strong>espect for one another, and gaining <strong>K</strong>nowledge that lasts a lifetime.
+  </div>
+
+  <p class="spark-title">Our mission comes to life through S.P.A.R.K.</p>
+  <div class="spark-grid">
+    <div class="spark-item">
+      <div class="spark-letter"><span>S</span></div>
+      <div class="spark-word">Skills through hands-on practice</div>
+    </div>
+    <div class="spark-item">
+      <div class="spark-letter"><span>P</span></div>
+      <div class="spark-word">Persistence in problem-solving</div>
+    </div>
+    <div class="spark-item">
+      <div class="spark-letter"><span>A</span></div>
+      <div class="spark-word">Achieve together</div>
+    </div>
+    <div class="spark-item">
+      <div class="spark-letter"><span>R</span></div>
+      <div class="spark-word">Respect for teammates</div>
+    </div>
+    <div class="spark-item">
+      <div class="spark-letter"><span>K</span></div>
+      <div class="spark-word">Knowledge for life</div>
+    </div>
+  </div>
+
+  <div class="why-section">
+    <h2 class="why-title">Why S.P.A.R.K. Matters</h2>
+
+    <div class="why-grid">
+      <div class="why-item">
+        <div class="why-letter">S</div>
+        <div>
+          <div class="why-body-title">Skills through hands-on practice</div>
+          <div class="why-body-text">Real learning happens by doing. When students wire a sensor, debug a program, or rebuild a mechanism that failed, they're developing technical fluency and confidence that no lecture can replicate — the same trial-and-error mindset that drives innovation in every engineering field.</div>
+        </div>
+      </div>
+      <div class="why-item">
+        <div class="why-letter">P</div>
+        <div>
+          <div class="why-body-title">Persistence in problem-solving</div>
+          <div class="why-body-text">Robots don't work the first time. Students learn to sit with frustration, try another approach, and keep going — a resilience that matters far beyond robotics, whether they're facing a tough exam, a difficult job, or a setback later in life.</div>
+        </div>
+      </div>
+      <div class="why-item">
+        <div class="why-letter">A</div>
+        <div>
+          <div class="why-body-title">Achieve together</div>
+          <div class="why-body-text">No student builds a competitive robot alone. They learn to divide work, listen to teammates with different strengths, and combine ideas into something better than any one person could create — the same collaborative skill that drives nearly every modern workplace.</div>
+        </div>
+      </div>
+      <div class="why-item">
+        <div class="why-letter">R</div>
+        <div>
+          <div class="why-body-title">Respect for teammates</div>
+          <div class="why-body-text">Diverse teams build better robots. Students practice hearing out a teammate's idea before dismissing it, giving credit generously, and disagreeing without tearing each other down — the groundwork for becoming leaders and collaborators people actually want to work with.</div>
+        </div>
+      </div>
+      <div class="why-item">
+        <div class="why-letter">K</div>
+        <div>
+          <div class="why-body-title">Knowledge for life</div>
+          <div class="why-body-text">Specific tools and competition rules will change, but the underlying way of thinking — breaking down complex problems, testing ideas, and learning from failure — stays with students into any field they choose, whether or not it involves a robot.</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="why-intro" style="margin-top: 30px;">Put simply, we don't just want our students to build great robots — we want them to become the kind of thinkers and teammates who are ready for whatever comes next. That's why every meeting, every build session, and every competition centers on safe, fun, project-based lessons that build real skills in design, coding, and teamwork.</p>
+  </div>
+</div>
+</body>
+</html>
