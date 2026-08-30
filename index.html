@@ -161,6 +161,17 @@
     max-width: 984px;
     margin-bottom: 22px;
   }
+  .hero-title.oneline {
+    white-space: nowrap;
+    font-size: clamp(24px, 4.4vw, 60px);
+    max-width: none;
+  }
+  @media (max-width: 560px) {
+    .hero-title.oneline {
+      white-space: normal;
+      font-size: clamp(24px, 8vw, 38px);
+    }
+  }
   .hero-sub {
     font-size: 20px;
     line-height: 1.7;
@@ -451,7 +462,7 @@
 <div class="hero-band">
   <div class="hero-inner">
     <div class="hero-eyebrow">STEM Program &middot; Team 16158</div>
-    <h1 class="hero-title">Building Robots. Building Character.</h1>
+    <h1 class="hero-title oneline">Building Robots. Building Character.</h1>
     <p class="hero-sub">BCS Robotics is a student-driven robotics program where members learn engineering, coding, and teamwork through the VEX IQ Challenge. We bring together students who are curious about how things work to design, build, and program robots — while developing real-world skills in problem-solving and leadership.</p>
   </div>
 </div>
