@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bcsrobotics.github.io/robotics/sitemap.xml
