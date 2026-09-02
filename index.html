@@ -516,7 +516,7 @@
     color: #0d1b2a;
     text-transform: uppercase;
     letter-spacing: 0.02em;
-    margin-bottom: 12px;
+    margin: 0 0 12px;
     line-height: 1.25;
   }
   .card-tag {
@@ -588,9 +588,10 @@
   .faq-item { border-bottom: 1px solid rgba(13,27,42,0.1); padding: 20px 0; }
   .faq-item:first-of-type { border-top: 1px solid rgba(13,27,42,0.1); }
   .faq-question {
-    font-weight: 600; font-size: 20px; color: #0d1b2a; cursor: pointer;
-    list-style: none; display: flex; align-items: baseline; gap: 17px;
-    position: relative; padding-right: 36px;
+    cursor: pointer;
+    list-style: none;
+    position: relative;
+    padding-right: 36px;
   }
   .faq-question::-webkit-details-marker { display: none; }
   .faq-question::after {
@@ -598,6 +599,10 @@
     font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; color: #378ADD;
   }
   .faq-item[open] .faq-question::after { content: '\2212'; }
+  .faq-question-text {
+    font-weight: 600; font-size: 20px; color: #0d1b2a; margin: 0;
+    display: flex; align-items: baseline; gap: 17px;
+  }
   .faq-num { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 17px; color: #378ADD; flex-shrink: 0; }
   .faq-answer { font-size: 18px; color: #495563; line-height: 1.7; margin-top: 14px; padding-left: 41px; max-width: 912px; }
 
@@ -969,7 +974,7 @@
     <div class="grid-2">
       <div class="card">
         <div class="card-eyebrow">Module 01</div>
-        <div class="card-title">Introduction to Robotics</div>
+        <h3 class="card-title">Introduction to Robotics</h3>
         <div class="card-tag">Weeks 1&ndash;2</div>
         <ul>
           <li>Basic robotics concepts &amp; VEX IQ kit overview</li>
@@ -979,7 +984,7 @@
       </div>
       <div class="card">
         <div class="card-eyebrow">Module 02</div>
-        <div class="card-title">Engineering &amp; Programming Foundations</div>
+        <h3 class="card-title">Engineering &amp; Programming Foundations</h3>
         <div class="card-tag">Weeks 3&ndash;5</div>
         <ul>
           <li>Simple machine principles: gears, wheels, levers, sensors</li>
@@ -989,7 +994,7 @@
       </div>
       <div class="card">
         <div class="card-eyebrow">Module 03</div>
-        <div class="card-title">Applied Robotics Challenges</div>
+        <h3 class="card-title">Applied Robotics Challenges</h3>
         <div class="card-tag">Weeks 6&ndash;8</div>
         <ul>
           <li>Building robots to complete specific tasks</li>
@@ -999,7 +1004,7 @@
       </div>
       <div class="card">
         <div class="card-eyebrow">Module 04</div>
-        <div class="card-title">Showcase &amp; Competition Prep</div>
+        <h3 class="card-title">Showcase &amp; Competition Prep</h3>
         <div class="card-tag">Weeks 9&ndash;20</div>
         <ul>
           <li>Team projects solving complex challenges</li>

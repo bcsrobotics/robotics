@@ -260,12 +260,152 @@
     color: #cfe0f0;
     max-width: 816px;
   }
+  .hero-sub.oneline {
+    white-space: nowrap;
+    max-width: none;
+    font-size: clamp(14px, 2.6vw, 20px);
+  }
+  @media (max-width: 560px) {
+    .hero-sub.oneline {
+      white-space: normal;
+      font-size: 16px;
+    }
+  }
   .hero-address {
     font-size: 16px;
     color: #7bb8ec;
     font-weight: 600;
     margin-top: 20px;
   }
+
+  /* ---------- Home carousel ---------- */
+  .home-carousel {
+    width: 100%;
+    background: #0d1b2a;
+    position: relative;
+    overflow: hidden;
+  }
+  .carousel-track {
+    position: relative;
+    width: 100%;
+    max-width: 1160px;
+    margin: 0 auto;
+    aspect-ratio: 16 / 9;
+    max-height: 58.5vh;
+  }
+  @media (max-width: 700px) {
+    .carousel-track { aspect-ratio: 4 / 3; max-height: 50vh; }
+  }
+  .carousel-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.8s ease-in-out;
+  }
+  .carousel-slide.portrait {
+    object-fit: contain;
+    background: #0d1b2a;
+  }
+  .carousel-slide.active {
+    opacity: 1;
+  }
+
+  .carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(13,27,42,0.45);
+    color: #ffffff;
+    border: none;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 15;
+    transition: background 0.15s;
+  }
+  .carousel-arrow svg { width: 20px; height: 20px; }
+  .carousel-arrow:hover { background: rgba(13,27,42,0.7); }
+  .carousel-arrow-prev { left: 14px; }
+  .carousel-arrow-next { right: 14px; }
+  @media (max-width: 560px) {
+    .carousel-arrow { width: 34px; height: 34px; }
+    .carousel-arrow svg { width: 16px; height: 16px; }
+  }
+
+  .carousel-bottom-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
+    padding: 46px 20px 16px;
+    z-index: 8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .carousel-caption {
+    display: none;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    max-width: 90%;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+  }
+  .carousel-caption.active { display: block; }
+  @media (max-width: 560px) {
+    .carousel-caption { font-size: 13px; }
+  }
+
+  .carousel-controls-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .carousel-dots {
+    display: flex;
+    gap: 10px;
+  }
+  .carousel-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .carousel-dot:hover { background: rgba(255,255,255,0.7); }
+  .carousel-dot.active {
+    background: #ffffff;
+    transform: scale(1.2);
+  }
+  .carousel-pause {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .carousel-pause:hover { background: rgba(255,255,255,0.3); }
+  .carousel-pause svg { width: 13px; height: 13px; }
 
   /* ---------- Section bands ---------- */
   .section {
@@ -376,7 +516,7 @@
     color: #0d1b2a;
     text-transform: uppercase;
     letter-spacing: 0.02em;
-    margin-bottom: 12px;
+    margin: 0 0 12px;
     line-height: 1.25;
   }
   .card-tag {
@@ -448,9 +588,10 @@
   .faq-item { border-bottom: 1px solid rgba(13,27,42,0.1); padding: 20px 0; }
   .faq-item:first-of-type { border-top: 1px solid rgba(13,27,42,0.1); }
   .faq-question {
-    font-weight: 600; font-size: 20px; color: #0d1b2a; cursor: pointer;
-    list-style: none; display: flex; align-items: baseline; gap: 17px;
-    position: relative; padding-right: 36px;
+    cursor: pointer;
+    list-style: none;
+    position: relative;
+    padding-right: 36px;
   }
   .faq-question::-webkit-details-marker { display: none; }
   .faq-question::after {
@@ -458,6 +599,10 @@
     font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; color: #378ADD;
   }
   .faq-item[open] .faq-question::after { content: '\2212'; }
+  .faq-question-text {
+    font-weight: 600; font-size: 20px; color: #0d1b2a; margin: 0;
+    display: flex; align-items: baseline; gap: 17px;
+  }
   .faq-num { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 17px; color: #378ADD; flex-shrink: 0; }
   .faq-answer { font-size: 18px; color: #495563; line-height: 1.7; margin-top: 14px; padding-left: 41px; max-width: 912px; }
 
@@ -472,6 +617,69 @@
   .contact-email { font-size: 25px; font-weight: 600; color: #0d1b2a; }
   .contact-email a { color: #0d1b2a; text-decoration: none; border-bottom: 2px solid #378ADD; }
   .contact-email a:hover { color: #2170b8; }
+  .form-embed-wrap {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid rgba(13,27,42,0.08);
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(13,27,42,0.05);
+    padding: 8px;
+  }
+  .form-embed-wrap iframe {
+    width: 100%;
+    height: 1658px;
+    border: none;
+    display: block;
+    border-radius: 4px;
+  }
+  .form-note {
+    font-size: 14px;
+    color: #7c8894;
+    font-style: italic;
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto 18px;
+  }
+  .cta-button {
+    display: inline-block;
+    background: #378ADD;
+    color: #ffffff;
+    text-decoration: none;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 16px 38px;
+    border-radius: 6px;
+    transition: background 0.15s, transform 0.15s;
+    box-shadow: 0 4px 14px rgba(55,138,221,0.3);
+  }
+  .cta-button:hover {
+    background: #2170b8;
+    transform: translateY(-1px);
+  }
+  .cta-button-secondary {
+    background: transparent;
+    color: #2170b8;
+    border: 2px solid #378ADD;
+    box-shadow: none;
+  }
+  .cta-button-secondary:hover {
+    background: rgba(55,138,221,0.1);
+    color: #2170b8;
+  }
+  .or-divider {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #9aa4ad;
+    margin: 20px 0;
+  }
 
   /* Article (Tournaments) */
   .article-img { width: 100%; border: 1px solid rgba(13,27,42,0.08); }
@@ -676,47 +884,47 @@
 <div class="section bg-white">
   <div class="section-inner" style="max-width: 900px;">
       <details class="faq-item" open>
-        <summary class="faq-question"><span class="faq-num">01</span>Who can join BCS Robotics?</summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">01</span>Who can join BCS Robotics?</h3></summary>
         <div class="faq-answer">The program is open to 3rd–8th grade students in the Baltimore/Towson area. All you need is an interest in STEM, building things, and working with others — no coding or engineering experience necessary!</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><span class="faq-num">02</span>Do I need any prior coding or engineering experience?</summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">02</span>Do I need any prior coding or engineering experience?</h3></summary>
         <div class="faq-answer">Not at all. Our curriculum starts with the basics — introducing the VEX robotics kit, simple machines, and beginner-friendly programming — so students with zero experience can jump right in alongside more experienced teammates.</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><span class="faq-num">03</span>What will my child actually learn?</summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">03</span>What will my child actually learn?</h3></summary>
         <div class="faq-answer">Students move through a 20-week curriculum in four modules: an introduction to robotics and teamwork, engineering and programming foundations, applied robotics challenges, and finally a showcase and competition-prep module where teams tackle complex projects and compete in tournaments.</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><span class="faq-num">04</span>When and where do classes meet?</summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">04</span>When and where do classes meet?</h3></summary>
         <div class="faq-answer">Classes meet once a week on Sundays, aligned with Chinese School class time slots, for 90 minutes per session. Each semester (Fall and Spring) runs 18–20 weeks. Classes are held at Baltimore Chinese School at Towson University, 254 University Ave, Towson, MD 21204.</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><span class="faq-num">05</span>What robotics platform does the program use?</summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">05</span>What robotics platform does the program use?</h3></summary>
         <div class="faq-answer">We use the VEX robotics platform, one of the most widely used robotics programs for elementary and middle school students worldwide, recognized by Guinness World Records as the largest robotics competition in the world.</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><span class="faq-num">06</span>Is instruction in English or Chinese?</summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">06</span>Is instruction in English or Chinese?</h3></summary>
         <div class="faq-answer">Instruction is in English, with bilingual support available if needed, so students and families more comfortable in Chinese still have a smooth experience.</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><span class="faq-num">07</span>Does the team compete in tournaments?</summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">07</span>Does the team compete in tournaments?</h3></summary>
         <div class="faq-answer">Yes, but it's optional — students can choose whether or not to compete. In our very first season (2025–2026), the teams that did compete — 16158A, 16158B, and 16158M — took part in multiple regional tournaments and advanced to the Maryland State Championship, bringing home the Judges Award, the Teamwork Champion Award, the Sportsmanship Award, and top-5 state finishes.</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><span class="faq-num">08</span>What is the S.P.A.R.K. mission all about?</summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">08</span>What is the S.P.A.R.K. mission all about?</h3></summary>
         <div class="faq-answer">S.P.A.R.K. stands for Skills through hands-on practice, Persistence in problem-solving, Achieve together, Respect for teammates, and Knowledge for life. It's the framework behind everything we teach — helping students build not just robots, but the habits and character that will serve them well beyond robotics.</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><span class="faq-num">09</span>Who teaches and coaches the program?</summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">09</span>Who teaches and coaches the program?</h3></summary>
         <div class="faq-answer">BCS Robotics is run by a team of high school students with years of hands-on VEX robotics experience — including regional, state, and World Championship competition. We're excited to mentor the next generation of builders and coders using what we've learned.</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><span class="faq-num">10</span>How do I enroll or ask more questions?</summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">10</span>How do I enroll or ask more questions?</h3></summary>
         <div class="faq-answer">Reach out to us anytime at bcsvexiqrobotics@gmail.com. We're happy to answer questions about enrollment, scheduling, or the program in general.</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><span class="faq-num">11</span>Is competition student-centered?</summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">11</span>Is competition student-centered?</h3></summary>
         <div class="faq-answer">Yes. Being student-centered is central to the VEX experience — students do the real work of designing, building, coding, driving, strategizing, and presenting. Coaches, mentors, and parents can offer guidance and ask questions, but they don't fix the robot, write the code, or make decisions for the team. This ensures every success truly reflects the students' own learning and effort.</div>
       </details>
   </div>

@@ -516,7 +516,7 @@
     color: #0d1b2a;
     text-transform: uppercase;
     letter-spacing: 0.02em;
-    margin-bottom: 12px;
+    margin: 0 0 12px;
     line-height: 1.25;
   }
   .card-tag {
@@ -588,9 +588,10 @@
   .faq-item { border-bottom: 1px solid rgba(13,27,42,0.1); padding: 20px 0; }
   .faq-item:first-of-type { border-top: 1px solid rgba(13,27,42,0.1); }
   .faq-question {
-    font-weight: 600; font-size: 20px; color: #0d1b2a; cursor: pointer;
-    list-style: none; display: flex; align-items: baseline; gap: 17px;
-    position: relative; padding-right: 36px;
+    cursor: pointer;
+    list-style: none;
+    position: relative;
+    padding-right: 36px;
   }
   .faq-question::-webkit-details-marker { display: none; }
   .faq-question::after {
@@ -598,6 +599,10 @@
     font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; color: #378ADD;
   }
   .faq-item[open] .faq-question::after { content: '\2212'; }
+  .faq-question-text {
+    font-weight: 600; font-size: 20px; color: #0d1b2a; margin: 0;
+    display: flex; align-items: baseline; gap: 17px;
+  }
   .faq-num { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 17px; color: #378ADD; flex-shrink: 0; }
   .faq-answer { font-size: 18px; color: #495563; line-height: 1.7; margin-top: 14px; padding-left: 41px; max-width: 912px; }
 
@@ -959,7 +964,7 @@
     <div class="grid-2">
       <div class="card">
         <div class="card-eyebrow">模块 01</div>
-        <div class="card-title">机器人入门</div>
+        <h3 class="card-title">机器人入门</h3>
         <div class="card-tag">第1&ndash;2周</div>
         <ul>
           <li>机器人基础知识与VEX IQ套件介绍</li>
@@ -969,7 +974,7 @@
       </div>
       <div class="card">
         <div class="card-eyebrow">模块 02</div>
-        <div class="card-title">工程与编程基础</div>
+        <h3 class="card-title">工程与编程基础</h3>
         <div class="card-tag">第3&ndash;5周</div>
         <ul>
           <li>简单机械原理：齿轮、轮子、杠杆、传感器</li>
@@ -979,7 +984,7 @@
       </div>
       <div class="card">
         <div class="card-eyebrow">模块 03</div>
-        <div class="card-title">应用机器人挑战</div>
+        <h3 class="card-title">应用机器人挑战</h3>
         <div class="card-tag">第6&ndash;8周</div>
         <ul>
           <li>搭建机器人完成特定任务</li>
@@ -989,7 +994,7 @@
       </div>
       <div class="card">
         <div class="card-eyebrow">模块 04</div>
-        <div class="card-title">成果展示与赛前准备</div>
+        <h3 class="card-title">成果展示与赛前准备</h3>
         <div class="card-tag">第9&ndash;20周</div>
         <ul>
           <li>团队项目挑战复杂任务</li>
