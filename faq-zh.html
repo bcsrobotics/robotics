@@ -668,6 +668,8 @@
     text-transform: uppercase;
     padding: 16px 38px;
     border-radius: 6px;
+    border: none;
+    cursor: pointer;
     transition: background 0.15s, transform 0.15s;
     box-shadow: 0 4px 14px rgba(55,138,221,0.3);
   }
@@ -786,6 +788,75 @@
     color: #2170b8;
   }
   .social-links svg { width: 18px; height: 18px; }
+
+  .footer-install-btn {
+    background: rgba(55,138,221,0.18);
+    border: 1px solid rgba(55,138,221,0.4);
+    color: #7bb8ec;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .footer-install-btn:hover {
+    background: rgba(55,138,221,0.32);
+    color: #ffffff;
+  }
+
+  .install-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(13,27,42,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  .install-modal-overlay.active { display: flex; }
+  .install-modal {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 32px 28px 26px;
+    max-width: 400px;
+    width: 100%;
+    position: relative;
+    text-align: center;
+  }
+  .install-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    background: none;
+    border: none;
+    font-size: 22px;
+    line-height: 1;
+    color: #9aa4ad;
+    cursor: pointer;
+  }
+  .install-modal-close:hover { color: #566270; }
+  .install-modal h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    color: #0d1b2a;
+    text-transform: uppercase;
+    margin: 0 0 14px;
+  }
+  .install-modal p {
+    font-size: 15px;
+    color: #495563;
+    line-height: 1.6;
+    margin: 0 0 10px;
+    text-align: left;
+  }
+  .install-modal strong { color: #0d1b2a; }
   .footer-copyright {
     max-width: 1392px;
     margin: 0 auto;
@@ -816,6 +887,14 @@
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "BCS机器人战队有手机APP吗？在哪里以及如何下载？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "有的！我们的网站可以作为一个可安装的APP添加到手机主屏幕——无需前往任何应用商店。在iPhone/iPad上，请在Safari浏览器中点击分享图标，然后选择“添加到主屏幕”。在Android手机上，请在Chrome浏览器中点击菜单（⋮），然后选择“安装应用”或“添加到主屏幕”。您也可以点击网站任意页面底部（页脚）的安装APP按钮开始安装。"
+      }
+    },
     {
       "@type": "Question",
       "name": "谁可以加入BCS机器人战队？",
@@ -936,6 +1015,30 @@
       navigator.serviceWorker.register('sw.js').catch(function () {});
     });
   }
+
+  // Capture the browser's native install prompt so our custom buttons can trigger it
+  var bcsDeferredInstallPrompt = null;
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    bcsDeferredInstallPrompt = e;
+  });
+
+  function bcsInstallClick() {
+    if (bcsDeferredInstallPrompt) {
+      bcsDeferredInstallPrompt.prompt();
+      bcsDeferredInstallPrompt.userChoice.then(function () {
+        bcsDeferredInstallPrompt = null;
+      });
+    } else {
+      var modal = document.getElementById('bcsInstallModal');
+      if (modal) modal.classList.add('active');
+    }
+  }
+
+  function bcsCloseInstallModal() {
+    var modal = document.getElementById('bcsInstallModal');
+    if (modal) modal.classList.remove('active');
+  }
 </script>
 </head>
 <body>
@@ -981,51 +1084,55 @@
 <div class="section bg-white">
   <div class="section-inner" style="max-width: 900px;">
       <details class="faq-item" open>
-        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">01</span>谁可以加入BCS机器人战队？</h3></summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">01</span>BCS机器人战队有手机APP吗？在哪里以及如何下载？</h3></summary>
+        <div class="faq-answer">有的！我们的网站可以作为一个可安装的APP添加到手机主屏幕——无需前往任何应用商店。在iPhone/iPad上，请在Safari浏览器中点击分享图标，然后选择“添加到主屏幕”。在Android手机上，请在Chrome浏览器中点击菜单（⋮），然后选择“安装应用”或“添加到主屏幕”。您也可以点击网站任意页面底部（页脚）的<strong>安装APP</strong>按钮开始安装。</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">02</span>谁可以加入BCS机器人战队？</h3></summary>
         <div class="faq-answer">该项目面向巴尔的摩/陶森地区的3至8年级学生。你只需要对STEM、动手搭建以及与他人合作感兴趣——无需任何编程或工程经验！</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">02</span>我需要有编程或工程经验吗？</h3></summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">03</span>我需要有编程或工程经验吗？</h3></summary>
         <div class="faq-answer">完全不需要。我们的课程从基础开始——介绍VEX机器人套件、简单机械原理以及适合初学者的编程内容——因此零基础的学生也能与经验更丰富的队友一起轻松上手。</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">03</span>我的孩子具体会学到什么？</h3></summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">04</span>我的孩子具体会学到什么？</h3></summary>
         <div class="faq-answer">学生将通过为期20周、共四个模块的课程逐步学习：机器人与团队协作入门、工程与编程基础、应用机器人挑战，最后是成果展示与赛前准备模块，团队将在其中挑战复杂项目并参加比赛。</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">04</span>上课时间和地点是怎样的？</h3></summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">05</span>上课时间和地点是怎样的？</h3></summary>
         <div class="faq-answer">每周上课一次，时间为周日，每节课90分钟。每学期（秋季/春季）为期18–20周。上课地点为<a href="https://www.towson.edu" target="_blank" rel="noopener" style="color:#2170b8; font-weight:600;">陶森大学</a>内的<a href="https://www.baltimorechineseschool.org/" target="_blank" rel="noopener" style="color:#2170b8; font-weight:600;">巴尔的摩中文学校</a>，254 University Ave, Towson, MD 21204。</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">05</span>项目使用的是什么机器人平台？</h3></summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">06</span>项目使用的是什么机器人平台？</h3></summary>
         <div class="faq-answer">我们使用<a href="https://www.vexrobotics.com/" target="_blank" rel="noopener" style="color:#2170b8; font-weight:600;">VEX机器人</a>平台，这是全球中小学生中使用最广泛的机器人项目之一，被吉尼斯世界纪录认证为全球最大的机器人竞赛。</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">06</span>授课语言是英文还是中文？</h3></summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">07</span>授课语言是英文还是中文？</h3></summary>
         <div class="faq-answer">授课语言为英文，如有需要可提供双语支持，让更习惯中文交流的学生和家庭也能顺利参与。</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">07</span>战队是否会参加比赛？</h3></summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">08</span>战队是否会参加比赛？</h3></summary>
         <div class="faq-answer">会，但这是自愿的——学生可以自行选择是否参赛。在我们的首个赛季（2025–2026），选择参赛的三支战队——16158A、16158B和16158M——参加了多场区域锦标赛并晋级马里兰州锦标赛，斩获评委奖、团队冠军奖、体育精神奖以及州赛前五的好成绩。</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">08</span>S.P.A.R.K.使命具体指什么？</h3></summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">09</span>S.P.A.R.K.使命具体指什么？</h3></summary>
         <div class="faq-answer">S.P.A.R.K.代表通过动手实践掌握技能（Skills）、在解决问题中保持毅力（Persistence）、团结协作共同成就（Achieve together）、尊重每一位队友（Respect），以及让知识受益终生（Knowledge）。这是我们所有教学内容背后的核心框架——帮助学生不仅造出机器人，更培养让他们受益终生的习惯与品格。</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">09</span>谁来授课与指导这个项目？</h3></summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">10</span>谁来授课与指导这个项目？</h3></summary>
         <div class="faq-answer">BCS机器人战队由一群拥有多年VEX机器人实战经验的高中生运营——包括区域赛、州赛乃至世界锦标赛的参赛经历。我们很高兴能运用所学，指导下一代的创造者与程序员。</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">10</span>我该如何报名或咨询更多信息？</h3></summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">11</span>我该如何报名或咨询更多信息？</h3></summary>
         <div class="faq-answer">如需报名，请前往<a href="programs-zh.html" style="color:#2170b8; font-weight:600;">课程项目</a>页面，点击“报名”按钮完成注册。如需咨询问题，请前往<a href="contact-zh.html" style="color:#2170b8; font-weight:600;">联系我们</a>页面发送咨询——我们很乐意解答关于报名、时间安排或项目本身的任何问题。</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">11</span>比赛是否以学生为中心？</h3></summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">12</span>比赛是否以学生为中心？</h3></summary>
         <div class="faq-answer">是的。以学生为中心是VEX体验的核心——学生自己完成设计、搭建、编程、操控、制定策略与展示等真正的工作。教练、导师与家长可以提供引导和提问，但不会替团队修理机器人、编写代码或做决策。这确保了每一次成功都真正体现学生自身的学习与努力。想了解作为战队学生具体应该期待什么，请参阅VEX的<a href="https://kb.vex.com/hc/en-us/articles/48975337540628-VEX-Students-Start-Here" target="_blank" rel="noopener" style="color:#2170b8; font-weight:600;">学生入门指南</a>（英文）。</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">12</span>在孩子的机器人学习过程中，家长应该扮演什么角色？</h3></summary>
+        <summary class="faq-question"><h3 class="faq-question-text"><span class="faq-num">13</span>在孩子的机器人学习过程中，家长应该扮演什么角色？</h3></summary>
         <div class="faq-answer">家长不需要有工程或STEM背景才能参与其中——最有价值的角色是鼓励、提问和支持孩子，而不是替他们完成工作。家长不应替孩子完成工作、参与团队决策，或干预机器人设计与比赛策略——这些都应完全由学生自主决定。可以提供帮助的方式包括协助处理战队后勤事务、为孩子的努力与成长而不仅仅是比赛成绩喝彩，或者只是问问孩子正在制作什么、遇到了哪些挑战。想了解更多建议，请参阅VEX的<a href="https://kb.vex.com/hc/en-us/articles/48971126180628-VEX-Parents-Start-Here" target="_blank" rel="noopener" style="color:#2170b8; font-weight:600;">家长入门指南</a>（英文）。</div>
       </details>
   </div>
@@ -1052,10 +1159,21 @@
       <a href="https://www.tiktok.com/@bcsrobotics16158" target="_blank" rel="noopener" class="footer-social-icon" aria-label="在TikTok上关注我们">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"></path></svg>
       </a>
+      <button type="button" class="footer-install-btn install-app-btn" onclick="bcsInstallClick()">安装APP</button>
       <div class="footer-badge">26&ndash;27 赛季</div>
     </div>
   </div>
   <div class="footer-copyright">版权所有 &copy; 2026 BCS Robotics. 保留所有权利。</div>
 </footer>
+
+<div class="install-modal-overlay" id="bcsInstallModal">
+  <div class="install-modal">
+    <button type="button" class="install-modal-close" onclick="bcsCloseInstallModal()" aria-label="Close">&times;</button>
+    <h3>安装BCS机器人APP</h3>
+    <p><strong>iPhone/iPad（Safari浏览器）：</strong>点击分享图标，然后选择“添加到主屏幕”。</p>
+    <p><strong>Android（Chrome浏览器）：</strong>点击菜单（⋮），然后选择“安装应用”或“添加到主屏幕”。</p>
+    <p>在电脑端Chrome/Edge浏览器中，请查看地址栏中的安装图标。</p>
+  </div>
+</div>
 </body>
 </html>
