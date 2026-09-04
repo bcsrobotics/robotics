@@ -1,0 +1,25 @@
+{
+  "name": "BCS Robotics",
+  "short_name": "BCS Robotics",
+  "description": "BCS Robotics — Team 16158 VEX IQ robotics program for grades 3-8 in Baltimore/Towson, MD.",
+  "start_url": "index.html",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#eef1f4",
+  "theme_color": "#0d1b2a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

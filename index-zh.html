@@ -25,6 +25,11 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://bcsrobotics.org/index-zh.html">
 <meta property="og:locale" content="zh_CN">
+<link rel="manifest" href="manifest-zh.json">
+<meta name="theme-color" content="#0d1b2a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BCS Robotics">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;500;600;700;800;900&family=Barlow:wght@300;400;500;600&family=Noto+Sans+SC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
 <style>
 
@@ -823,6 +828,28 @@
   },
   "sport": "Robotics"
 }
+</script>
+<script>
+  // Tag whether this session is running as an installed app or a regular browser tab
+  (function () {
+    var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (typeof gtag === 'function') {
+      gtag('event', 'app_launch_mode', { display_mode: isStandalone ? 'standalone' : 'browser' });
+    }
+  })();
+
+  // Track when a visitor actually installs the PWA
+  window.addEventListener('appinstalled', function () {
+    if (typeof gtag === 'function') {
+      gtag('event', 'pwa_install');
+    }
+  });
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function () {});
+    });
+  }
 </script>
 </head>
 <body>
