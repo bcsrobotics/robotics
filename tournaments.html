@@ -926,6 +926,24 @@
     if (modal) modal.classList.remove('active');
   }
 </script>
+<style>
+  .tn-heading{font-family:'Barlow Condensed',sans-serif;font-size:24px;text-transform:uppercase;color:#0d1b2a;margin:30px 0 16px;}
+  .tn-list{display:grid;gap:16px;margin-bottom:10px;}
+  .tn-card{background:#f4f7fa;border-left:4px solid #378ADD;padding:20px 24px;border-radius:2px;}
+  .tn-card.past{opacity:.75;border-left-color:#9aa4ad;}
+  .tn-date{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:#2170b8;margin-bottom:6px;}
+  .tn-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:24px;color:#0d1b2a;margin:0 0 10px;line-height:1.2;}
+  .tn-meta{font-size:16px;color:#495563;line-height:1.7;}
+  .tn-meta strong{color:#0d1b2a;}
+  .tn-meta a{color:#2170b8;font-weight:600;}
+  .tn-notes{font-size:16px;color:#495563;line-height:1.65;margin-top:10px;white-space:pre-line;}
+  .tn-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px;}
+  .tn-actions a{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.05em;text-transform:uppercase;text-decoration:none;padding:8px 16px;border-radius:4px;border:1.5px solid #378ADD;color:#2170b8;}
+  .tn-actions a.primary{background:#378ADD;color:#fff;}
+  .tn-actions a:hover{background:rgba(55,138,221,.14);}
+  .tn-actions a.primary:hover{background:#2170b8;}
+  .tn-status{font-size:16px;color:#7c8894;}
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -1016,6 +1034,7 @@
     <div class="tab-panel" id="panel-2627">
     <p class="body-text">The 2026&ndash;2027 season brings a brand-new VEX IQ challenge: <strong>Level Up</strong>. Our teams are gearing up to compete, and this page will be updated with tournament results, standings, and highlights as the season gets underway.</p>
     <p class="body-text">Want to see the official rules? Check out the <a href="https://www.vexrobotics.com/level-up-manual" target="_blank" rel="noopener" style="color:#2170b8; font-weight:600;">Level Up Game Manual</a>.</p>
+    <div id="tournament-list" aria-live="polite"></div>
     <div class="pull-box">
       Check back soon for updates on our 2026&ndash;2027 Level Up season — or follow along on our <a href="contact.html" style="color:#2170b8; font-weight:600;">Contact</a> page for the latest news.
     </div>
@@ -1060,5 +1079,99 @@
     <p>On desktop Chrome/Edge, look for the install icon in the address bar.</p>
   </div>
 </div>
+<script>
+(function () {
+  var box = document.getElementById('tournament-list');
+  if (!box) return;
+  var SB_URL = 'https://eggquuvpcrlkyxjimgfr.supabase.co';
+  var SB_KEY = 'sb_publishable_GbnZ2QW-H72gxNnv9u8IFA_-9xSmPik';
+  var zh = (document.documentElement.lang || '').toLowerCase().indexOf('zh') === 0;
+  var T = zh ? {
+    upcoming: '即将举行的赛事', past: '往期赛事', none: '暂无已发布的赛事，敬请期待。',
+    error: '赛事日程暂时无法加载，请稍后再试。', teams: '参赛战队', division: '组别',
+    map: '地图', cal: '添加到日历', reg: '报名 / 赛事详情', loading: '正在加载赛事日程…'
+  } : {
+    upcoming: 'Upcoming Events', past: 'Past Events', none: 'No tournaments have been posted yet. Check back soon.',
+    error: 'The schedule could not be loaded right now. Please try again later.', teams: 'Teams', division: 'Division',
+    map: 'Map', cal: 'Add to calendar', reg: 'Register / event details', loading: 'Loading schedule…'
+  };
+  box.textContent = T.loading;
+  box.className = 'tn-status';
+
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function ymd(d) { return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()); }
+  function parseD(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function fmtD(d) { return d.toLocaleDateString(zh ? 'zh-CN' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' }); }
+  function fmtT(s) {
+    var p = s.split(':'); var h = +p[0], m = p[1];
+    if (zh) return pad(h) + ':' + m;
+    return ((h % 12) || 12) + ':' + m + ' ' + (h < 12 ? 'AM' : 'PM');
+  }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function safeUrl(u) { return /^https?:\/\//i.test(u || '') ? u : null; }
+  function addLink(parent, href, label, cls) {
+    var a = el('a', cls || '', label); a.href = href; a.target = '_blank'; a.rel = 'noopener'; parent.appendChild(a); return a;
+  }
+
+  function card(r, isPast) {
+    var c = el('div', 'tn-card' + (isPast ? ' past' : ''));
+    var s = parseD(r.event_date);
+    var e = r.end_date && r.end_date !== r.event_date ? parseD(r.end_date) : null;
+    var when = fmtD(s) + (e ? ' – ' + fmtD(e) : '') + (r.start_time ? ' · ' + fmtT(r.start_time) : '');
+    c.appendChild(el('div', 'tn-date', when));
+    c.appendChild(el('h3', 'tn-title', (zh && r.name_zh) ? r.name_zh : r.name));
+    var meta = el('div', 'tn-meta');
+    function line(label, value) {
+      if (!value) return;
+      var d = el('div'); d.appendChild(el('strong', '', label + ': ')); d.appendChild(document.createTextNode(value)); meta.appendChild(d);
+    }
+    var where = [r.venue, r.address].filter(Boolean).join(' — ');
+    if (where) { var d = el('div'); d.appendChild(document.createTextNode(where)); meta.appendChild(d); }
+    line(T.division, r.division);
+    line(T.teams, r.teams);
+    c.appendChild(meta);
+    var notes = (zh && r.notes_zh) ? r.notes_zh : r.notes;
+    if (notes) c.appendChild(el('div', 'tn-notes', notes));
+    var actions = el('div', 'tn-actions');
+    var reg = safeUrl(r.registration_url);
+    if (reg) addLink(actions, reg, T.reg, 'primary');
+    var place = r.address || r.venue;
+    if (place) addLink(actions, 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(place), T.map);
+    var endD = new Date((e || s).getTime()); endD.setDate(endD.getDate() + 1);
+    var name = (zh && r.name_zh) ? r.name_zh : r.name;
+    var cal = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(name) +
+      '&dates=' + ymd(s) + '/' + ymd(endD) +
+      (place ? '&location=' + encodeURIComponent(place) : '') +
+      (r.start_time ? '&details=' + encodeURIComponent(fmtT(r.start_time)) : '');
+    addLink(actions, cal, T.cal);
+    c.appendChild(actions);
+    return c;
+  }
+
+  function section(title, rows, isPast) {
+    var wrap = document.createDocumentFragment();
+    wrap.appendChild(el('h3', 'tn-heading', title));
+    var list = el('div', 'tn-list');
+    rows.forEach(function (r) { list.appendChild(card(r, isPast)); });
+    wrap.appendChild(list);
+    return wrap;
+  }
+
+  fetch(SB_URL + '/rest/v1/tournaments?select=*&is_published=eq.true&order=event_date.asc', { headers: { apikey: SB_KEY } })
+    .then(function (res) { if (!res.ok) throw new Error(String(res.status)); return res.json(); })
+    .then(function (rows) {
+      box.textContent = '';
+      box.className = '';
+      if (!rows.length) { box.className = 'tn-status'; box.textContent = T.none; return; }
+      var now = new Date();
+      var today = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+      var upcoming = rows.filter(function (r) { return (r.end_date || r.event_date) >= today; });
+      var past = rows.filter(function (r) { return (r.end_date || r.event_date) < today; }).reverse();
+      if (upcoming.length) box.appendChild(section(T.upcoming, upcoming, false));
+      if (past.length) box.appendChild(section(T.past, past, true));
+    })
+    .catch(function () { box.className = 'tn-status'; box.textContent = T.error; });
+})();
+</script>
 </body>
 </html>
