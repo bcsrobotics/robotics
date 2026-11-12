@@ -1,11 +1,17 @@
 // BCS Robotics service worker
 // Provides basic offline support and enables "Add to Home Screen" installability.
 
-const CACHE_NAME = 'bcsrobotics-cache-v1';
+const CACHE_NAME = 'bcsrobotics-cache-v2';
 
-// Install: activate immediately without waiting for old tabs to close
+// Install: activate immediately, and save the app view so the installed app
+// opens even on the very first launch without a connection.
 self.addEventListener('install', function (event) {
   self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(function (cache) {
+      return cache.add('app.html').catch(function () {});
+    })
+  );
 });
 
 // Activate: clean up any old cache versions
@@ -34,10 +40,13 @@ self.addEventListener('fetch', function (event) {
   event.respondWith(
     fetch(event.request)
       .then(function (response) {
-        var responseClone = response.clone();
-        caches.open(CACHE_NAME).then(function (cache) {
-          cache.put(event.request, responseClone);
-        });
+        // Only keep good responses, so an error page never replaces a saved copy
+        if (response && response.ok) {
+          var responseClone = response.clone();
+          caches.open(CACHE_NAME).then(function (cache) {
+            cache.put(event.request, responseClone);
+          });
+        }
         return response;
       })
       .catch(function () {
