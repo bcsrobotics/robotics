@@ -950,6 +950,28 @@
   .coach-table button{margin-right:10px;}
   .coach-form h3{font-family:'Barlow Condensed',sans-serif;font-size:22px;text-transform:uppercase;color:#0d1b2a;margin:0 0 18px;}
   .coach-form .actions{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+  .coach-form select,.ro-toolbar select{display:block;width:100%;margin-top:6px;padding:11px 13px;border:1px solid rgba(13,27,42,0.2);border-radius:6px;font:inherit;font-size:16px;color:#2b3946;background:#fff;}
+  .coach-tabs{display:flex;gap:6px;border-bottom:2px solid rgba(13,27,42,0.1);margin-bottom:28px;}
+  .coach-tabs button{background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;padding:12px 18px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:.05em;text-transform:uppercase;color:#566270;cursor:pointer;}
+  .coach-tabs button[aria-selected="true"]{color:#0d1b2a;border-bottom-color:#378ADD;}
+  .ro-toolbar{display:flex;flex-wrap:wrap;gap:18px 28px;align-items:flex-end;margin-bottom:18px;}
+  .ro-toolbar label{font-weight:600;font-size:15px;color:#0d1b2a;min-width:150px;}
+  .ro-toolbar .check{display:flex;align-items:center;gap:10px;min-width:0;}
+  .ro-toolbar .check input{width:auto;margin:0;}
+  .ro-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;margin-bottom:40px;}
+  .ro-team{background:#f4f7fa;border-top:4px solid #378ADD;border-radius:4px;padding:18px 20px;}
+  .ro-team.un{border-top-color:#9aa4ad;}
+  .ro-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+  .ro-head h3{font-family:'Barlow Condensed',sans-serif;font-size:24px;text-transform:uppercase;color:#0d1b2a;margin:0;}
+  .ro-count{font-size:14px;font-weight:400;color:#7c8894;text-transform:none;letter-spacing:0;}
+  .ro-div{font-size:14px;color:#566270;margin-bottom:8px;}
+  .ro-list{list-style:none;margin:0;padding:0;}
+  .ro-list li{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid rgba(13,27,42,0.08);font-size:16px;}
+  .ro-list .ro-name{flex:1;color:#0d1b2a;font-weight:600;}
+  .ro-list .ro-grade{color:#566270;font-size:14px;min-width:34px;}
+  .ro-list .ro-off{font-size:12px;font-weight:700;color:#7c8894;background:#eceff2;border-radius:10px;padding:1px 8px;}
+  .ro-list .coach-link{font-size:14px;}
+  .ro-empty{color:#7c8894;font-size:15px;font-style:italic;}
 </style>
 </head>
 <body>
@@ -984,7 +1006,7 @@
   <div class="hero-inner">
     <div class="hero-eyebrow">Coach Tools &middot; Internal Use</div>
     <h1 class="hero-title">Coach Dashboard</h1>
-    <p class="hero-sub">Sign in to manage the tournament schedule shown on the public Tournaments page.</p>
+    <p class="hero-sub">Sign in to manage tournaments and team rosters. Roster data is private and visible only to signed-in coaches.</p>
   </div>
 </div>
 
@@ -1004,6 +1026,12 @@
     <div id="coach-app" hidden>
       <div class="coach-bar"><span>Signed in as <strong id="coach-who"></strong></span><button type="button" class="coach-link" id="signout-btn">Sign out</button></div>
 
+      <div class="coach-tabs" role="tablist">
+        <button type="button" role="tab" id="tab-tn" aria-selected="true">Tournaments</button>
+        <button type="button" role="tab" id="tab-ro" aria-selected="false">Rosters</button>
+      </div>
+
+      <div id="panel-tn">
       <h2 class="section-title">Tournaments</h2>
       <p class="body-text">Events marked <strong>Published</strong> appear on the public Tournaments page. Drafts are visible only to coaches.</p>
       <div class="coach-table-wrap">
@@ -1047,6 +1075,51 @@
         </div>
         <p class="coach-msg" id="form-msg" role="status"></p>
       </form>
+      </div>
+
+      <div id="panel-ro" hidden>
+        <h2 class="section-title">Team Rosters</h2>
+        <p class="body-text">Student names are private: they appear only here, for signed-in coaches, and never on the public website.</p>
+        <div class="ro-toolbar">
+          <label>Season<select id="ro-season"></select></label>
+          <label class="check"><input type="checkbox" id="ro-inactive"> Show inactive students</label>
+          <button type="button" class="coach-link" id="ro-csv">Download CSV</button>
+        </div>
+        <p class="coach-msg" id="ro-msg" role="status"></p>
+        <div id="ro-teams" class="ro-grid"></div>
+        <div id="ro-unassigned"></div>
+
+        <form id="st-form" class="coach-form" autocomplete="off">
+          <h3 id="st-title">Add a student</h3>
+          <div class="row">
+            <label>Full name<input type="text" id="s-name" required maxlength="120"></label>
+            <label>Grade<span class="hint">Optional, 1&ndash;12</span><input type="number" id="s-grade" min="1" max="12"></label>
+          </div>
+          <div class="row">
+            <label>Team<select id="s-team"></select></label>
+            <label class="check"><input type="checkbox" id="s-active" checked> Active</label>
+          </div>
+          <div class="actions">
+            <button type="submit" class="cta-button" id="s-save">Add student</button>
+            <button type="button" class="coach-link" id="s-cancel" hidden>Cancel editing</button>
+            <button type="button" class="coach-link" id="s-delete" hidden>Delete student</button>
+          </div>
+          <p class="coach-msg" id="st-msg" role="status"></p>
+        </form>
+
+        <form id="team-form" class="coach-form" autocomplete="off">
+          <h3>Add a team</h3>
+          <div class="row">
+            <label>Team number<span class="hint">e.g. 16158A</span><input type="text" id="t-number" required maxlength="20"></label>
+            <label>Season<span class="hint">e.g. 2026-27</span><input type="text" id="t-season" required maxlength="20"></label>
+          </div>
+          <div class="row">
+            <label>Division<span class="hint">Optional</span><input type="text" id="t-division" maxlength="60"></label>
+          </div>
+          <div class="actions"><button type="submit" class="cta-button">Add team</button></div>
+          <p class="coach-msg" id="team-msg" role="status"></p>
+        </form>
+      </div>
     </div>
 
   </div>
@@ -1148,6 +1221,7 @@
 
   function showLogin(msg) {
     saveSession(null);
+    clearRosterData();
     $('coach-app').hidden = true;
     $('coach-login').hidden = false;
     setMsg('login-msg', msg || '', !!msg);
@@ -1157,6 +1231,8 @@
     $('coach-app').hidden = false;
     $('coach-who').textContent = session.user.email;
     resetForm();
+    ro.loaded = false;
+    showTab('tn');
     loadList();
   }
   function verifyCoach() {
@@ -1289,6 +1365,232 @@
         setMsg('list-msg', 'Deleted.'); loadList();
       }).catch(function (err) { setMsg('list-msg', err.message, true); });
   }
+
+  // ---------- Rosters ----------
+  var ro = { teams: [], students: [], members: [], loaded: false };
+  var editingStudent = null, pendingSeason = null;
+
+  function mk(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function ordinal(n) { if (n == null) return '—'; var s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
+  function clearRosterData() {
+    ro = { teams: [], students: [], members: [], loaded: false };
+    editingStudent = null;
+    ['ro-teams', 'ro-unassigned'].forEach(function (id) { $(id).textContent = ''; });
+    ['s-name', 's-grade', 't-number', 't-season', 't-division'].forEach(function (id) { $(id).value = ''; });
+  }
+  function showTab(which) {
+    var isRo = which === 'ro';
+    $('panel-tn').hidden = isRo; $('panel-ro').hidden = !isRo;
+    $('tab-tn').setAttribute('aria-selected', String(!isRo)); $('tab-ro').setAttribute('aria-selected', String(isRo));
+    if (isRo) loadRosters();   // always fetch fresh data when the tab is opened
+  }
+  $('tab-tn').addEventListener('click', function () { showTab('tn'); });
+  $('tab-ro').addEventListener('click', function () { showTab('ro'); });
+
+  function seasonList() { var seen = {}; ro.teams.forEach(function (t) { seen[t.season] = true; }); return Object.keys(seen).sort().reverse(); }
+  function fillSeasons() {
+    var sel = $('ro-season'), want = pendingSeason || sel.value, list = seasonList();
+    pendingSeason = null; sel.textContent = '';
+    list.forEach(function (s) { var o = document.createElement('option'); o.value = s; o.textContent = s; sel.appendChild(o); });
+    if (list.length) sel.value = list.indexOf(want) >= 0 ? want : list[0];
+  }
+  function curSeason() { return $('ro-season').value; }
+  function seasonTeams() { return ro.teams.filter(function (t) { return t.season === curSeason(); }); }
+  function studentById(id) { return ro.students.filter(function (s) { return s.id === id; })[0]; }
+  function seasonMembership(studentId) {
+    var ids = seasonTeams().map(function (t) { return t.id; });
+    return ro.members.filter(function (m) { return m.student_id === studentId && ids.indexOf(m.team_id) >= 0; }).map(function (m) { return m.team_id; });
+  }
+  function byGradeThenName(a, b) {
+    var ga = a.grade == null ? -1 : a.grade, gb = b.grade == null ? -1 : b.grade;
+    return gb - ga || a.full_name.localeCompare(b.full_name);
+  }
+  function fillTeamSelect(selected) {
+    var sel = $('s-team'), cur = selected !== undefined ? selected : sel.value;
+    sel.textContent = '';
+    var none = document.createElement('option'); none.value = ''; none.textContent = 'Unassigned'; sel.appendChild(none);
+    seasonTeams().forEach(function (t) { var o = document.createElement('option'); o.value = String(t.id); o.textContent = t.team_number; sel.appendChild(o); });
+    sel.value = cur == null ? '' : String(cur);
+    if (sel.selectedIndex < 0) sel.value = '';
+  }
+
+  function loadRosters() {
+    setMsg('ro-msg', '');
+    return Promise.all([
+      authed('/rest/v1/teams?select=*&order=team_number.asc'),
+      authed('/rest/v1/students?select=*&order=full_name.asc'),
+      authed('/rest/v1/team_members?select=team_id,student_id')
+    ]).then(function (r) {
+      ro.teams = r[0] || []; ro.students = r[1] || []; ro.members = r[2] || []; ro.loaded = true;
+      fillSeasons(); renderRosters();
+    }).catch(function (err) { setMsg('ro-msg', 'Could not load rosters: ' + err.message, true); });
+  }
+
+  function studentRow(s, team) {
+    var li = mk('li');
+    li.appendChild(mk('span', 'ro-name', s.full_name));
+    li.appendChild(mk('span', 'ro-grade', ordinal(s.grade)));
+    if (!s.active) li.appendChild(mk('span', 'ro-off', 'Inactive'));
+    var eb = mk('button', 'coach-link', 'Edit'); eb.type = 'button'; eb.addEventListener('click', function () { startEditStudent(s); }); li.appendChild(eb);
+    if (team) {
+      var rb = mk('button', 'coach-link', 'Remove'); rb.type = 'button';
+      rb.title = 'Take off this team (the student is kept)';
+      rb.addEventListener('click', function () { removeFromTeam(team, s); }); li.appendChild(rb);
+    }
+    return li;
+  }
+  function renderRosters() {
+    var box = $('ro-teams'), un = $('ro-unassigned'), showOff = $('ro-inactive').checked;
+    box.textContent = ''; un.textContent = '';
+    fillTeamSelect();
+    var teams = seasonTeams();
+    if (!teams.length) { box.appendChild(mk('p', 'ro-empty', 'No teams yet. Add the first team below.')); }
+    teams.forEach(function (t) {
+      var members = ro.members.filter(function (m) { return m.team_id === t.id; })
+        .map(function (m) { return studentById(m.student_id); }).filter(Boolean).sort(byGradeThenName);
+      var activeCount = members.filter(function (s) { return s.active; }).length;
+      var card = mk('div', 'ro-team');
+      var head = mk('div', 'ro-head');
+      var h = mk('h3', '', t.team_number); h.appendChild(document.createTextNode(' ')); h.appendChild(mk('span', 'ro-count', activeCount + (activeCount === 1 ? ' student' : ' students')));
+      head.appendChild(h);
+      var dt = mk('button', 'coach-link', 'Delete team'); dt.type = 'button'; dt.addEventListener('click', function () { deleteTeam(t, members.length); }); head.appendChild(dt);
+      card.appendChild(head);
+      if (t.division) card.appendChild(mk('div', 'ro-div', t.division));
+      var ul = mk('ul', 'ro-list');
+      var shown = members.filter(function (s) { return s.active || showOff; });
+      shown.forEach(function (s) { ul.appendChild(studentRow(s, t)); });
+      if (!shown.length) ul.appendChild(mk('li', 'ro-empty', 'No students on this team yet.'));
+      card.appendChild(ul); box.appendChild(card);
+    });
+    var assigned = {};
+    teams.forEach(function (t) { ro.members.forEach(function (m) { if (m.team_id === t.id) assigned[m.student_id] = true; }); });
+    var free = ro.students.filter(function (s) { return !assigned[s.id] && (s.active || showOff); }).sort(byGradeThenName);
+    if (free.length) {
+      var card2 = mk('div', 'ro-team un'); card2.style.marginBottom = '40px';
+      var head2 = mk('div', 'ro-head'); var h2 = mk('h3', '', 'Not on a team'); h2.appendChild(document.createTextNode(' ')); h2.appendChild(mk('span', 'ro-count', free.length + ' for ' + curSeason()));
+      head2.appendChild(h2); card2.appendChild(head2);
+      var ul2 = mk('ul', 'ro-list'); free.forEach(function (s) { ul2.appendChild(studentRow(s, null)); }); card2.appendChild(ul2); un.appendChild(card2);
+    }
+  }
+  $('ro-season').addEventListener('change', function () { cancelEditStudent(); renderRosters(); });
+  $('ro-inactive').addEventListener('change', renderRosters);
+
+  // ----- student form (add / edit / move) -----
+  function resetStudentForm() {
+    editingStudent = null;
+    $('s-name').value = ''; $('s-grade').value = ''; $('s-active').checked = true;
+    $('st-title').textContent = 'Add a student'; $('s-save').textContent = 'Add student';
+    $('s-cancel').hidden = true; $('s-delete').hidden = true;
+  }
+  function cancelEditStudent() { resetStudentForm(); setMsg('st-msg', ''); }
+  function startEditStudent(s) {
+    editingStudent = s.id;
+    $('s-name').value = s.full_name; $('s-grade').value = s.grade == null ? '' : String(s.grade); $('s-active').checked = !!s.active;
+    fillTeamSelect(seasonMembership(s.id)[0]);
+    $('st-title').textContent = 'Edit student'; $('s-save').textContent = 'Save changes';
+    $('s-cancel').hidden = false; $('s-delete').hidden = false; setMsg('st-msg', '');
+    $('st-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  $('s-cancel').addEventListener('click', cancelEditStudent);
+
+  function setTeam(studentId, teamId) {
+    var current = seasonMembership(studentId), chain = Promise.resolve();
+    if (teamId !== null && current.indexOf(teamId) < 0) {
+      chain = chain.then(function () {
+        return authed('/rest/v1/team_members?on_conflict=team_id,student_id', { method: 'POST', body: { team_id: teamId, student_id: studentId }, prefer: 'resolution=ignore-duplicates,return=minimal' });
+      });
+    }
+    var drop = current.filter(function (id) { return id !== teamId; });
+    if (drop.length) {
+      chain = chain.then(function () {
+        return authed('/rest/v1/team_members?student_id=eq.' + encodeURIComponent(String(studentId)) + '&team_id=in.(' + drop.join(',') + ')', { method: 'DELETE' });
+      });
+    }
+    return chain;
+  }
+  $('st-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = $('s-name').value.trim();
+    if (!name) { setMsg('st-msg', 'Please enter a name.', true); return; }
+    var g = $('s-grade').value.trim(), grade = g === '' ? null : parseInt(g, 10);
+    if (grade !== null && (isNaN(grade) || grade < 1 || grade > 12)) { setMsg('st-msg', 'Grade must be between 1 and 12.', true); return; }
+    var teamId = $('s-team').value === '' ? null : Number($('s-team').value);
+    var body = { full_name: name, grade: grade, active: $('s-active').checked };
+    setMsg('st-msg', 'Saving…');
+    var p;
+    if (editingStudent) {
+      var sid = editingStudent;
+      p = authed('/rest/v1/students?id=eq.' + encodeURIComponent(String(sid)), { method: 'PATCH', body: body, prefer: 'return=representation' })
+        .then(function (res) { if (!res || !res.length) throw new Error('Nothing was saved. Your account may not have permission.'); return setTeam(sid, teamId); });
+    } else {
+      p = authed('/rest/v1/students', { method: 'POST', body: body, prefer: 'return=representation' })
+        .then(function (res) { if (!res || !res.length) throw new Error('Nothing was saved. Your account may not have permission.'); return setTeam(res[0].id, teamId); });
+    }
+    var keepTeam = $('s-team').value;
+    p.then(function () { resetStudentForm(); return loadRosters(); })
+      .then(function () { $('s-team').value = keepTeam; if ($('s-team').selectedIndex < 0) $('s-team').value = ''; setMsg('st-msg', 'Saved.'); })
+      .catch(function (err) { setMsg('st-msg', err.message, true); });
+  });
+  $('s-delete').addEventListener('click', function () {
+    var s = studentById(editingStudent); if (!s) return;
+    if (!window.confirm('Permanently delete ' + s.full_name + '? This removes them from every team and cannot be undone.\n\n(To keep their record, untick "Active" instead.)')) return;
+    authed('/rest/v1/students?id=eq.' + encodeURIComponent(String(s.id)), { method: 'DELETE', prefer: 'return=representation' }).then(function (res) {
+      if (!res || !res.length) throw new Error('Nothing was deleted. Your account may not have permission.');
+      resetStudentForm(); setMsg('st-msg', 'Deleted.'); return loadRosters();
+    }).catch(function (err) { setMsg('st-msg', err.message, true); });
+  });
+  function removeFromTeam(team, s) {
+    authed('/rest/v1/team_members?team_id=eq.' + encodeURIComponent(String(team.id)) + '&student_id=eq.' + encodeURIComponent(String(s.id)), { method: 'DELETE', prefer: 'return=representation' })
+      .then(function (res) {
+        if (!res || !res.length) throw new Error('Nothing was changed. Your account may not have permission.');
+        setMsg('ro-msg', s.full_name + ' was taken off ' + team.team_number + '.'); return loadRosters();
+      }).catch(function (err) { setMsg('ro-msg', err.message, true); });
+  }
+
+  // ----- teams -----
+  $('team-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var num = $('t-number').value.trim(), season = $('t-season').value.trim(), div = $('t-division').value.trim();
+    if (!num || !season) { setMsg('team-msg', 'Team number and season are required.', true); return; }
+    setMsg('team-msg', 'Saving…');
+    authed('/rest/v1/teams', { method: 'POST', body: { team_number: num, season: season, division: div === '' ? null : div }, prefer: 'return=representation' })
+      .then(function (res) {
+        if (!res || !res.length) throw new Error('Nothing was saved. Your account may not have permission.');
+        $('t-number').value = ''; $('t-division').value = ''; pendingSeason = season;
+        setMsg('team-msg', 'Team added.'); return loadRosters();
+      }).catch(function (err) {
+        setMsg('team-msg', /duplicate|unique/i.test(err.message) ? 'That team already exists for this season.' : err.message, true);
+      });
+  });
+  function deleteTeam(t, memberCount) {
+    var note = memberCount ? ' Its ' + memberCount + ' student(s) are kept and will show under "Not on a team".' : '';
+    if (!window.confirm('Delete team ' + t.team_number + ' (' + t.season + ')?' + note)) return;
+    authed('/rest/v1/teams?id=eq.' + encodeURIComponent(String(t.id)), { method: 'DELETE', prefer: 'return=representation' }).then(function (res) {
+      if (!res || !res.length) throw new Error('Nothing was deleted. Your account may not have permission.');
+      setMsg('ro-msg', 'Team ' + t.team_number + ' deleted.'); return loadRosters();
+    }).catch(function (err) { setMsg('ro-msg', err.message, true); });
+  }
+
+  // ----- CSV export -----
+  function csvCell(v) {
+    var s = v == null ? '' : String(v);
+    if (/^[=+\-@\t\r]/.test(s) && isNaN(Number(s))) s = "'" + s;   // stop spreadsheet formula injection
+    return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  $('ro-csv').addEventListener('click', function () {
+    var rows = [['Season', 'Team', 'Name', 'Grade', 'Active']], teams = seasonTeams(), assigned = {};
+    teams.forEach(function (t) {
+      ro.members.filter(function (m) { return m.team_id === t.id; }).map(function (m) { return studentById(m.student_id); }).filter(Boolean).sort(byGradeThenName)
+        .forEach(function (s) { assigned[s.id] = true; rows.push([t.season, t.team_number, s.full_name, s.grade == null ? '' : s.grade, s.active ? 'yes' : 'no']); });
+    });
+    ro.students.filter(function (s) { return !assigned[s.id]; }).sort(byGradeThenName)
+      .forEach(function (s) { rows.push([curSeason(), '(no team)', s.full_name, s.grade == null ? '' : s.grade, s.active ? 'yes' : 'no']); });
+    var csv = '\ufeff' + rows.map(function (r) { return r.map(csvCell).join(','); }).join('\r\n') + '\r\n';
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href = url; a.download = 'bcs-roster-' + (curSeason() || 'all') + '.csv';
+    document.body.appendChild(a); a.click(); a.parentNode.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+  });
 
   // ---------- Start ----------
   if (session) {
