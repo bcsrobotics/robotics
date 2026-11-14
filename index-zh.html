@@ -946,6 +946,31 @@
     if (modal) modal.classList.remove('active');
   }
 </script>
+<style>
+  /* ---------- Tournaments dropdown ---------- */
+  .nav-dd{position:relative;display:flex;align-items:center;border-radius:4px;transition:background .15s;}
+  .nav-dd:hover,.nav-dd.open{background:rgba(55,138,221,0.08);}
+  .nav-dd.active{background:rgba(55,138,221,0.12);}
+  .site-nav .nav-dd .nav-dd-main{padding-right:3px;background:none;}
+  .site-nav .nav-dd .nav-dd-main:hover{background:none;}
+  .nav-dd.active .nav-dd-main,.nav-dd.active .nav-dd-btn,.nav-dd:hover .nav-dd-main,.nav-dd:hover .nav-dd-btn,.nav-dd.open .nav-dd-main,.nav-dd.open .nav-dd-btn{color:#2170b8;}
+  .nav-dd-btn{background:none;border:0;padding:10px 11px 10px 3px;color:#566270;cursor:pointer;display:flex;align-items:center;border-radius:4px;}
+  .nav-dd-btn svg{width:14px;height:14px;transition:transform .15s;}
+  .nav-dd.open .nav-dd-btn svg{transform:rotate(180deg);}
+  .nav-dd-btn:focus-visible,.nav-dd-main:focus-visible{outline:3px solid #378ADD;outline-offset:-2px;}
+  .nav-dd-menu{display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:320px;max-width:min(380px,calc(100vw - 24px));background:#ffffff;border:1px solid rgba(13,27,42,0.12);border-radius:8px;box-shadow:0 10px 28px rgba(13,27,42,0.16);padding:6px;z-index:300;}
+  .nav-dd-menu.flip{left:auto;right:0;}
+  .nav-dd.open .nav-dd-menu{display:block;}
+  .site-nav .nav-dd-menu a{display:block;font-size:17px;letter-spacing:.02em;text-transform:none;white-space:normal;line-height:1.3;padding:12px 14px;border-radius:6px;color:#2b3946;}
+  .site-nav .nav-dd-menu a:hover{background:rgba(55,138,221,0.1);color:#2170b8;}
+  .site-nav .nav-dd-menu a[aria-current="true"]{background:rgba(55,138,221,0.14);color:#0d1b2a;font-weight:700;}
+  @media (max-width:860px){
+    .nav-dd{position:static;}
+    .nav-dd-btn{padding:7px 9px 7px 2px;}
+    .nav-dd-menu,.nav-dd-menu.flip{left:12px;right:12px;min-width:0;max-width:none;top:100%;}
+    .site-nav .nav-dd-menu a{font-size:16px;}
+  }
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -960,7 +985,14 @@
       <a href="about-zh.html">关于我们</a>
       <a href="mission-zh.html">宗旨</a>
       <a href="programs-zh.html">课程项目</a>
-      <a href="tournaments-zh.html">赛事战绩</a>
+      <div class="nav-dd">
+        <a href="tournaments-zh.html" class="nav-dd-main">赛事战绩</a>
+        <button type="button" class="nav-dd-btn" aria-expanded="false" aria-controls="navDdMenu" aria-label="显示赛事赛季"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
+        <div class="nav-dd-menu" id="navDdMenu">
+          <a href="tournaments-zh.html#2026-27" data-season="2026-27">2026&ndash;2027赛季 &mdash; Level Up</a>
+          <a href="tournaments-zh.html#2025-26" data-season="2025-26">2025&ndash;2026赛季 &mdash; Mix &amp; Match 回顾</a>
+        </div>
+      </div>
       <a href="faq-zh.html">常见问题</a>
       <a href="contact-zh.html">联系我们</a>
     </nav>
@@ -1241,5 +1273,58 @@
     <p>在电脑端Chrome/Edge浏览器中，请查看地址栏中的安装图标。</p>
   </div>
 </div>
+<script>
+(function () {
+  var dd = document.querySelector('.nav-dd'); if (!dd) return;
+  var btn = dd.querySelector('.nav-dd-btn'), menu = dd.querySelector('.nav-dd-menu');
+  var mouse = !!(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+  var INCH = 96;                           // one inch = 96 CSS pixels
+  function place() {                       // keep the menu on-screen when the item sits near the right edge
+    menu.classList.remove('flip');
+    var prev = menu.style.display; menu.style.display = 'block';
+    if (menu.getBoundingClientRect().right > window.innerWidth - 8) menu.classList.add('flip');
+    menu.style.display = prev;
+  }
+  function near(x, y) {                    // is the pointer within one inch of the menu or of its label?
+    return [dd, menu].some(function (el) {
+      var r = el.getBoundingClientRect();
+      return x >= r.left - INCH && x <= r.right + INCH && y >= r.top - INCH && y <= r.bottom + INCH;
+    });
+  }
+  var kbd = false;                         // true only while the person is using the keyboard (a mouse click also focuses a button, which must not count)
+  document.addEventListener('keydown', function (e) { if (e.key !== 'Escape') kbd = true; }, true);
+  document.addEventListener('mousedown', function () { kbd = false; }, true);
+  document.addEventListener('touchstart', function () { kbd = false; }, true);
+  function keyboardInside() { return kbd && dd.contains(document.activeElement); }
+  function onMove(e) { if (!near(e.clientX, e.clientY) && !keyboardInside()) setOpen(false); }
+  function setOpen(o) {
+    dd.classList.toggle('open', o); btn.setAttribute('aria-expanded', String(o));
+    if (o) { place(); if (mouse) document.addEventListener('mousemove', onMove); }
+    else document.removeEventListener('mousemove', onMove);
+  }
+  dd.addEventListener('mouseenter', function () { if (mouse) setOpen(true); });      // hover opens it; it then stays until the pointer is an inch away
+  btn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    var keyboard = e.detail === 0;         // Enter / Space on the arrow
+    setOpen(keyboard || !mouse ? !dd.classList.contains('open') : true);
+  });
+  document.addEventListener('click', function (e) { if (!dd.contains(e.target)) setOpen(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && dd.classList.contains('open')) { setOpen(false); btn.focus(); } });
+  dd.addEventListener('focusout', function (e) { if (e.relatedTarget && !dd.contains(e.relatedTarget)) setOpen(false); });
+  document.documentElement.addEventListener('mouseleave', function () { if (!keyboardInside()) setOpen(false); });
+  menu.querySelectorAll('a').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      if (e.detail > 0) a.blur();          // a mouse click shouldn't leave keyboard focus parked in the menu
+      if (!mouse) setOpen(false);          // touch: close after choosing. Mouse: stay open so the other season is one click away
+    });
+  });
+  function mark() {                        // on the Tournaments page, show which season is on screen
+    var onTn = !!document.getElementById('season-2026-27'), h = (location.hash || '').replace(/^#/, '');
+    var cur = onTn ? (h === '2025-26' ? '2025-26' : '2026-27') : null;
+    menu.querySelectorAll('a').forEach(function (a) { if (cur && a.getAttribute('data-season') === cur) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
+  }
+  window.addEventListener('hashchange', mark); mark();
+})();
+</script>
 </body>
 </html>

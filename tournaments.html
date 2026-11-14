@@ -957,6 +957,12 @@
   @media (max-width:560px){.tn-row,.tn-row.tm{grid-template-columns:1fr;gap:0;}.tn-row.tm .tn-l{white-space:normal;}}
 </style>
 <style>
+  .season-panel{display:none;}
+  .season-panel.active{display:block;}
+  .season-panel > .section-title{margin-bottom:22px;}
+</style>
+<noscript><style>.season-panel{display:block !important;margin-bottom:60px;}</style></noscript>
+<style>
   /* ---------- Tournaments dropdown ---------- */
   .nav-dd{position:relative;display:flex;align-items:center;border-radius:4px;transition:background .15s;}
   .nav-dd:hover,.nav-dd.open{background:rgba(55,138,221,0.08);}
@@ -974,10 +980,6 @@
   .site-nav .nav-dd-menu a{display:block;font-size:17px;letter-spacing:.02em;text-transform:none;white-space:normal;line-height:1.3;padding:12px 14px;border-radius:6px;color:#2b3946;}
   .site-nav .nav-dd-menu a:hover{background:rgba(55,138,221,0.1);color:#2170b8;}
   .site-nav .nav-dd-menu a[aria-current="true"]{background:rgba(55,138,221,0.14);color:#0d1b2a;font-weight:700;}
-  @media (hover:hover) and (pointer:fine){
-    .nav-dd:hover .nav-dd-menu{display:block;}
-    .nav-dd.suppress .nav-dd-menu{display:none;}
-  }
   @media (max-width:860px){
     .nav-dd{position:static;}
     .nav-dd-btn{padding:7px 9px 7px 2px;}
@@ -985,12 +987,6 @@
     .site-nav .nav-dd-menu a{font-size:16px;}
   }
 </style>
-<style>
-  .season-panel{display:none;}
-  .season-panel.active{display:block;}
-  .season-panel > .section-title{margin-bottom:22px;}
-</style>
-<noscript><style>.season-panel{display:block !important;margin-bottom:60px;}</style></noscript>
 </head>
 <body>
 <header class="site-header">
@@ -1198,7 +1194,7 @@
     var det = el('details', 'tn-more');
     det.appendChild(el('summary', '', zh ? '日程与详情' : 'Schedule and details'));
     secs.forEach(function (s) {
-      var box = el('section', 'tn-sec'), timed = /schedule|agenda/i.test(s.title), rows = null;
+      var box = el('section', 'tn-sec'), timed = /schedule|agenda|日程|议程/i.test(s.title), rows = null;
       if (s.title) box.appendChild(el('h4', 'tn-sh', s.title));
       s.items.forEach(function (it) {
         if (it.l != null) {
@@ -1210,6 +1206,16 @@
       det.appendChild(box);
     });
     card.appendChild(det);
+  }
+
+  // Division text is stored in English; show it in Chinese on the Chinese page.
+  var DIV_ZH = [['Open tournament', '公开赛'], ['All grade levels', '所有年级'], ['elementary and middle school', '小学和初中'], [' combined', '合并'],
+                ['Elementary School', '小学组'], ['Middle School', '初中组'], ['invitational', '邀请赛'], ['Elementary', '小学组'], ['Middle', '初中组'],
+                [', ', '，'], [' (', '（'], ['(', '（'], [')', '）']];
+  function divZh(s) {
+    if (!s) return s; var o = String(s);
+    DIV_ZH.forEach(function (p) { o = o.replace(new RegExp(p[0].replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), p[1]); });
+    return o;
   }
 
   function card(r, isPast) {
@@ -1226,7 +1232,7 @@
     }
     var where = [r.venue, r.address].filter(Boolean).join(' — ');
     if (where) { var d = el('div'); d.appendChild(document.createTextNode(where)); meta.appendChild(d); }
-    line(T.division, r.division);
+    line(T.division, zh ? divZh(r.division) : r.division);
     line(T.teams, r.teams);
     c.appendChild(meta);
     var notes = (zh && r.notes_zh) ? r.notes_zh : r.notes;
@@ -1276,19 +1282,47 @@
 (function () {
   var dd = document.querySelector('.nav-dd'); if (!dd) return;
   var btn = dd.querySelector('.nav-dd-btn'), menu = dd.querySelector('.nav-dd-menu');
+  var mouse = !!(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+  var INCH = 96;                           // one inch = 96 CSS pixels
   function place() {                       // keep the menu on-screen when the item sits near the right edge
     menu.classList.remove('flip');
     var prev = menu.style.display; menu.style.display = 'block';
     if (menu.getBoundingClientRect().right > window.innerWidth - 8) menu.classList.add('flip');
     menu.style.display = prev;
   }
-  function setOpen(o) { dd.classList.toggle('open', o); btn.setAttribute('aria-expanded', String(o)); if (o) place(); }
-  btn.addEventListener('click', function (e) { e.stopPropagation(); dd.classList.remove('suppress'); setOpen(!dd.classList.contains('open')); });
+  function near(x, y) {                    // is the pointer within one inch of the menu or of its label?
+    return [dd, menu].some(function (el) {
+      var r = el.getBoundingClientRect();
+      return x >= r.left - INCH && x <= r.right + INCH && y >= r.top - INCH && y <= r.bottom + INCH;
+    });
+  }
+  var kbd = false;                         // true only while the person is using the keyboard (a mouse click also focuses a button, which must not count)
+  document.addEventListener('keydown', function (e) { if (e.key !== 'Escape') kbd = true; }, true);
+  document.addEventListener('mousedown', function () { kbd = false; }, true);
+  document.addEventListener('touchstart', function () { kbd = false; }, true);
+  function keyboardInside() { return kbd && dd.contains(document.activeElement); }
+  function onMove(e) { if (!near(e.clientX, e.clientY) && !keyboardInside()) setOpen(false); }
+  function setOpen(o) {
+    dd.classList.toggle('open', o); btn.setAttribute('aria-expanded', String(o));
+    if (o) { place(); if (mouse) document.addEventListener('mousemove', onMove); }
+    else document.removeEventListener('mousemove', onMove);
+  }
+  dd.addEventListener('mouseenter', function () { if (mouse) setOpen(true); });      // hover opens it; it then stays until the pointer is an inch away
+  btn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    var keyboard = e.detail === 0;         // Enter / Space on the arrow
+    setOpen(keyboard || !mouse ? !dd.classList.contains('open') : true);
+  });
   document.addEventListener('click', function (e) { if (!dd.contains(e.target)) setOpen(false); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && dd.classList.contains('open')) { setOpen(false); btn.focus(); } });
-  dd.addEventListener('mouseenter', place);
-  dd.addEventListener('mouseleave', function () { dd.classList.remove('suppress'); });
-  menu.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', function () { setOpen(false); dd.classList.add('suppress'); }); });
+  dd.addEventListener('focusout', function (e) { if (e.relatedTarget && !dd.contains(e.relatedTarget)) setOpen(false); });
+  document.documentElement.addEventListener('mouseleave', function () { if (!keyboardInside()) setOpen(false); });
+  menu.querySelectorAll('a').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      if (e.detail > 0) a.blur();          // a mouse click shouldn't leave keyboard focus parked in the menu
+      if (!mouse) setOpen(false);          // touch: close after choosing. Mouse: stay open so the other season is one click away
+    });
+  });
   function mark() {                        // on the Tournaments page, show which season is on screen
     var onTn = !!document.getElementById('season-2026-27'), h = (location.hash || '').replace(/^#/, '');
     var cur = onTn ? (h === '2025-26' ? '2025-26' : '2026-27') : null;
