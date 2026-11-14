@@ -943,6 +943,18 @@
   .tn-actions a:hover{background:rgba(55,138,221,.14);}
   .tn-actions a.primary:hover{background:#2170b8;}
   .tn-status{font-size:16px;color:#7c8894;}
+  .tn-more{margin-top:14px;border-top:1px solid rgba(13,27,42,.12);padding-top:6px;}
+  .tn-more > summary{cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:.06em;text-transform:uppercase;color:#2170b8;padding:8px 0;}
+  .tn-sec{background:#fff;border-radius:6px;padding:14px 18px 8px;margin:10px 0;border:1px solid rgba(13,27,42,.08);}
+  .tn-sh{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#2170b8;margin:0 0 6px;}
+  .tn-row{display:grid;grid-template-columns:minmax(8rem,30%) 1fr;gap:2px 18px;padding:8px 0;border-top:1px solid rgba(13,27,42,.08);font-size:16px;line-height:1.5;}
+  .tn-rows > .tn-row:first-child{border-top:0;}
+  .tn-row.tm{grid-template-columns:10rem 1fr;}
+  .tn-l{font-weight:700;color:#0d1b2a;}
+  .tn-row.tm .tn-l{white-space:nowrap;font-variant-numeric:tabular-nums;}
+  .tn-r{color:#495563;}
+  .tn-p{font-size:16px;color:#495563;line-height:1.6;margin:0 0 8px;}
+  @media (max-width:560px){.tn-row,.tn-row.tm{grid-template-columns:1fr;gap:0;}.tn-row.tm .tn-l{white-space:normal;}}
 </style>
 </head>
 <body>
@@ -1114,6 +1126,40 @@
     var a = el('a', cls || '', label); a.href = href; a.target = '_blank'; a.rel = 'noopener'; parent.appendChild(a); return a;
   }
 
+  // "# Title" starts a section, "left | right" is a two-column row, anything else is a normal line.
+  function parseNotes(t) {
+    if (!t || !/^\s*#\s+\S/m.test(t)) return null;
+    var secs = [], cur = null;
+    String(t).split(/\r?\n/).forEach(function (raw) {
+      var line = raw.trim(); if (!line || /^#+$/.test(line)) return;   // blank lines and stray lone "#" are ignored
+      var h = /^#\s+(\S.*)$/.exec(line);
+      if (h) { cur = { title: h[1].trim(), items: [] }; secs.push(cur); return; }
+      if (!cur) { cur = { title: '', items: [] }; secs.push(cur); }
+      var i = line.indexOf(' | ');
+      cur.items.push(i > 0 ? { l: line.slice(0, i).trim(), r: line.slice(i + 3).trim() } : { t: line });
+    });
+    return secs;
+  }
+  function renderNotes(card, text) {
+    var secs = parseNotes(text);
+    if (!secs) { card.appendChild(el('div', 'tn-notes', text)); return; }
+    var det = el('details', 'tn-more');
+    det.appendChild(el('summary', '', zh ? '日程与详情' : 'Schedule and details'));
+    secs.forEach(function (s) {
+      var box = el('section', 'tn-sec'), timed = /schedule|agenda/i.test(s.title), rows = null;
+      if (s.title) box.appendChild(el('h4', 'tn-sh', s.title));
+      s.items.forEach(function (it) {
+        if (it.l != null) {
+          if (!rows) { rows = el('div', 'tn-rows'); box.appendChild(rows); }
+          var row = el('div', 'tn-row' + (timed ? ' tm' : ''));
+          row.appendChild(el('span', 'tn-l', it.l)); row.appendChild(el('span', 'tn-r', it.r)); rows.appendChild(row);
+        } else { rows = null; box.appendChild(el('p', 'tn-p', it.t)); }
+      });
+      det.appendChild(box);
+    });
+    card.appendChild(det);
+  }
+
   function card(r, isPast) {
     var c = el('div', 'tn-card' + (isPast ? ' past' : ''));
     var s = parseD(r.event_date);
@@ -1132,7 +1178,7 @@
     line(T.teams, r.teams);
     c.appendChild(meta);
     var notes = (zh && r.notes_zh) ? r.notes_zh : r.notes;
-    if (notes) c.appendChild(el('div', 'tn-notes', notes));
+    if (notes) renderNotes(c, notes);
     var actions = el('div', 'tn-actions');
     var reg = safeUrl(r.registration_url);
     if (reg) addLink(actions, reg, T.reg, 'primary');
