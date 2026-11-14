@@ -926,6 +926,35 @@
     if (modal) modal.classList.remove('active');
   }
 </script>
+<style>
+  /* ---------- Tournaments dropdown ---------- */
+  .nav-dd{position:relative;display:flex;align-items:center;border-radius:4px;transition:background .15s;}
+  .nav-dd:hover,.nav-dd.open{background:rgba(55,138,221,0.08);}
+  .nav-dd.active{background:rgba(55,138,221,0.12);}
+  .site-nav .nav-dd .nav-dd-main{padding-right:3px;background:none;}
+  .site-nav .nav-dd .nav-dd-main:hover{background:none;}
+  .nav-dd.active .nav-dd-main,.nav-dd.active .nav-dd-btn,.nav-dd:hover .nav-dd-main,.nav-dd:hover .nav-dd-btn,.nav-dd.open .nav-dd-main,.nav-dd.open .nav-dd-btn{color:#2170b8;}
+  .nav-dd-btn{background:none;border:0;padding:10px 11px 10px 3px;color:#566270;cursor:pointer;display:flex;align-items:center;border-radius:4px;}
+  .nav-dd-btn svg{width:14px;height:14px;transition:transform .15s;}
+  .nav-dd.open .nav-dd-btn svg{transform:rotate(180deg);}
+  .nav-dd-btn:focus-visible,.nav-dd-main:focus-visible{outline:3px solid #378ADD;outline-offset:-2px;}
+  .nav-dd-menu{display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:320px;max-width:min(380px,calc(100vw - 24px));background:#ffffff;border:1px solid rgba(13,27,42,0.12);border-radius:8px;box-shadow:0 10px 28px rgba(13,27,42,0.16);padding:6px;z-index:300;}
+  .nav-dd-menu.flip{left:auto;right:0;}
+  .nav-dd.open .nav-dd-menu{display:block;}
+  .site-nav .nav-dd-menu a{display:block;font-size:17px;letter-spacing:.02em;text-transform:none;white-space:normal;line-height:1.3;padding:12px 14px;border-radius:6px;color:#2b3946;}
+  .site-nav .nav-dd-menu a:hover{background:rgba(55,138,221,0.1);color:#2170b8;}
+  .site-nav .nav-dd-menu a[aria-current="true"]{background:rgba(55,138,221,0.14);color:#0d1b2a;font-weight:700;}
+  @media (hover:hover) and (pointer:fine){
+    .nav-dd:hover .nav-dd-menu{display:block;}
+    .nav-dd.suppress .nav-dd-menu{display:none;}
+  }
+  @media (max-width:860px){
+    .nav-dd{position:static;}
+    .nav-dd-btn{padding:7px 9px 7px 2px;}
+    .nav-dd-menu,.nav-dd-menu.flip{left:12px;right:12px;min-width:0;max-width:none;top:100%;}
+    .site-nav .nav-dd-menu a{font-size:16px;}
+  }
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -940,7 +969,14 @@
       <a href="about.html">About</a>
       <a href="mission.html">Mission</a>
       <a href="programs.html">Programs</a>
-      <a href="tournaments.html">Tournaments</a>
+      <div class="nav-dd">
+        <a href="tournaments.html" class="nav-dd-main">Tournaments</a>
+        <button type="button" class="nav-dd-btn" aria-expanded="false" aria-controls="navDdMenu" aria-label="Show tournament seasons"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
+        <div class="nav-dd-menu" id="navDdMenu">
+          <a href="tournaments.html#2026-27" data-season="2026-27">2026&ndash;2027 Season &mdash; Level Up</a>
+          <a href="tournaments.html#2025-26" data-season="2025-26">2025&ndash;2026 Season &mdash; Mix &amp; Match Recap</a>
+        </div>
+      </div>
       <a href="faq.html">FAQ</a>
       <a href="contact.html" class="active">Contact</a>
     </nav>
@@ -1026,5 +1062,30 @@
     <p>On desktop Chrome/Edge, look for the install icon in the address bar.</p>
   </div>
 </div>
+<script>
+(function () {
+  var dd = document.querySelector('.nav-dd'); if (!dd) return;
+  var btn = dd.querySelector('.nav-dd-btn'), menu = dd.querySelector('.nav-dd-menu');
+  function place() {                       // keep the menu on-screen when the item sits near the right edge
+    menu.classList.remove('flip');
+    var prev = menu.style.display; menu.style.display = 'block';
+    if (menu.getBoundingClientRect().right > window.innerWidth - 8) menu.classList.add('flip');
+    menu.style.display = prev;
+  }
+  function setOpen(o) { dd.classList.toggle('open', o); btn.setAttribute('aria-expanded', String(o)); if (o) place(); }
+  btn.addEventListener('click', function (e) { e.stopPropagation(); dd.classList.remove('suppress'); setOpen(!dd.classList.contains('open')); });
+  document.addEventListener('click', function (e) { if (!dd.contains(e.target)) setOpen(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && dd.classList.contains('open')) { setOpen(false); btn.focus(); } });
+  dd.addEventListener('mouseenter', place);
+  dd.addEventListener('mouseleave', function () { dd.classList.remove('suppress'); });
+  menu.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', function () { setOpen(false); dd.classList.add('suppress'); }); });
+  function mark() {                        // on the Tournaments page, show which season is on screen
+    var onTn = !!document.getElementById('season-2026-27'), h = (location.hash || '').replace(/^#/, '');
+    var cur = onTn ? (h === '2025-26' ? '2025-26' : '2026-27') : null;
+    menu.querySelectorAll('a').forEach(function (a) { if (cur && a.getAttribute('data-season') === cur) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
+  }
+  window.addEventListener('hashchange', mark); mark();
+})();
+</script>
 </body>
 </html>
