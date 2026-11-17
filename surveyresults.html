@@ -49,13 +49,13 @@
   .linkbox{flex:1;min-width:220px;word-break:break-all;background:var(--chip);border-radius:8px;padding:9px 12px;font-size:14px;color:var(--strong);}
   .wait ul{list-style:none;margin-top:6px;} .wait li{padding:4px 0;font-size:16px;} .wait b{color:var(--accent-dark);font:800 15px 'Barlow Condensed',sans-serif;letter-spacing:.06em;margin-right:8px;}
   .chartbox h2{font-size:20px;}
-  .chartbox svg{display:block;width:100%;height:auto;}
+  .chartbox svg{display:block;width:100%;max-width:640px;height:auto;margin:0 auto;}
   .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;margin:8px 4px 0;}
   .legend i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:6px;}
   .gline{stroke:var(--grid);stroke-width:1;} .gtext{fill:var(--muted);font:12px 'Barlow',sans-serif;}
   .bar-yes{fill:var(--yes);} .bar-no{fill:var(--no);}
-  .bval{fill:var(--strong);font:700 14px 'Barlow',sans-serif;text-anchor:middle;}
-  .xl{fill:var(--strong);font:700 13px 'Barlow',sans-serif;text-anchor:middle;} .xs{fill:var(--muted);font:12px 'Barlow',sans-serif;text-anchor:middle;}
+  .bval{fill:var(--strong);font:700 13px 'Barlow',sans-serif;text-anchor:start;}
+  .xl{fill:var(--strong);font:700 13px 'Barlow',sans-serif;text-anchor:start;} .xs{fill:var(--muted);font:11px 'Barlow',sans-serif;text-anchor:start;}
   .selbg{fill:var(--chip);}
   .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 10px;}
   .tab{border:2px solid var(--border);background:var(--surface);color:var(--text);border-radius:10px;padding:6px 12px;font:700 15px 'Barlow Condensed',sans-serif;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;min-height:38px;}
@@ -288,23 +288,26 @@
     var c = el('section', 'card chartbox'); c.appendChild(el('h2', '', 'Who can go to each tournament')); c.appendChild(overallChart()); c.appendChild(legend()); return c;
   }
   function overallChart() {
-    var opts = R.options, total = roster().length, W = 680, H = 340, ml = 40, mr = 12, mt = 26, mb = 92, pw = W - ml - mr, ph = H - mt - mb;
+    // One row per tournament: a green bar (yes) over a red bar (no). Works for any number of tournaments.
+    var opts = R.options, total = roster().length, W = 440, ml = 128, mr = 40, mt = 10, mb = 26, rowH = 54, pw = W - ml - mr, H = mt + opts.length * rowH + mb;
     var step = total <= 10 ? 2 : (total <= 30 ? 5 : 10), max = Math.max(step, Math.ceil(total / step) * step);
     var s = svg('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'class': 'overall' });
     s.setAttribute('aria-label', 'Bar chart of yes and no answers. ' + opts.map(function (o) { var c = counts(o); return o.label + ': ' + c.yes + ' yes, ' + c.no + ' no, ' + c.left + ' not answered'; }).join('. '));
-    var gw = pw / opts.length, bw = Math.min(42, gw * 0.3);
-    opts.forEach(function (o, i) { if (i === selOpt) s.appendChild(svg('rect', { 'class': 'selbg', x: ml + gw * i + 2, y: mt - 8, width: gw - 4, height: ph + mb - 2, rx: 8 })); });
-    for (var v = 0; v <= max; v += step) { var y = mt + ph - (v / max) * ph; s.appendChild(svg('line', { 'class': 'gline', x1: ml, x2: W - mr, y1: y, y2: y })); s.appendChild(svg('text', { 'class': 'gtext', x: ml - 8, y: y + 4, 'text-anchor': 'end' }, String(v))); }
+    opts.forEach(function (o, i) { if (i === selOpt) s.appendChild(svg('rect', { 'class': 'selbg', x: 2, y: mt + rowH * i + 1, width: W - 4, height: rowH - 2, rx: 8 })); });
+    for (var v = 0; v <= max; v += step) {
+      var gx = ml + (v / max) * pw;
+      s.appendChild(svg('line', { 'class': 'gline', x1: gx, x2: gx, y1: mt, y2: mt + opts.length * rowH }));
+      s.appendChild(svg('text', { 'class': 'gtext', x: gx, y: H - 8, 'text-anchor': 'middle' }, String(v)));
+    }
     opts.forEach(function (o, i) {
-      var c = counts(o), cx = ml + gw * i + gw / 2;
-      [['yes', c.yes, cx - bw - 3], ['no', c.no, cx + 3]].forEach(function (b) {
-        var h = (b[1] / max) * ph; s.appendChild(svg('rect', { 'class': 'bar-' + b[0], x: b[2], y: mt + ph - h, width: bw, height: h, rx: 3 }));
-        s.appendChild(svg('text', { 'class': 'bval', x: b[2] + bw / 2, y: mt + ph - h - 6 }, String(b[1])));
+      var c = counts(o), top = mt + rowH * i, parts = String(o.label).split(' \u00b7 ');
+      parts.forEach(function (p, k) { s.appendChild(svg('text', { 'class': 'xl', x: 10, y: top + 17 + k * 14 }, p)); });
+      s.appendChild(svg('text', { 'class': 'xs', x: 10, y: top + 17 + parts.length * 14 }, fmt(parseD(o.date), { month: 'short', day: 'numeric' }) + ' \u00b7 ' + c.left + ' pending'));
+      [['yes', c.yes, top + 8], ['no', c.no, top + 28]].forEach(function (b) {
+        var w = (b[1] / max) * pw;
+        s.appendChild(svg('rect', { 'class': 'bar-' + b[0], x: ml, y: b[2], width: w, height: 17, rx: 3 }));
+        s.appendChild(svg('text', { 'class': 'bval', x: ml + w + 6, y: b[2] + 13 }, String(b[1])));
       });
-      var parts = String(o.label).split(' \u00b7 '), ty = mt + ph + 20;
-      parts.forEach(function (p, k) { s.appendChild(svg('text', { 'class': 'xl', x: cx, y: ty + k * 15 }, p)); }); ty += parts.length * 15;
-      s.appendChild(svg('text', { 'class': 'xs', x: cx, y: ty + 1 }, fmt(parseD(o.date), { month: 'short', day: 'numeric' })));
-      s.appendChild(svg('text', { 'class': 'xs', x: cx, y: ty + 16 }, c.left + ' not answered'));
     });
     return s;
   }
@@ -326,7 +329,7 @@
   // ---------- who said what ----------
   function tableCard() {
     var c = el('section', 'card'); c.appendChild(el('h2', '', 'Every answer, by student'));
-    var wrap = el('div', 'tablewrap'), t = el('table'), hd = el('tr'); t.id = 'responses';
+    var wrap = el('div', 'tablewrap'), t = el('table'), hd = el('tr'); t.id = 'responses'; t.style.minWidth = (190 + R.options.length * 84) + 'px';
     hd.appendChild(el('th', '', 'Student'));
     R.options.forEach(function (o) { var th = el('th', '', o.label); th.appendChild(el('small', '', fmt(parseD(o.date), { month: 'short', day: 'numeric' }))); hd.appendChild(th); });
     hd.appendChild(el('th', '', 'Answered')); t.appendChild(hd);

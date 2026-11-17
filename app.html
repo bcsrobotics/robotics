@@ -201,7 +201,7 @@
 
   function load() {
     var rb = $('refreshBtn'); rb.classList.add('spin');
-    return fetch(SB_URL + '/rest/v1/tournaments?select=*&is_published=eq.true&order=event_date.asc', { headers: { apikey: SB_KEY } })
+    return fetch(SB_URL + '/rest/v1/tournaments?select=*&is_published=eq.true&order=event_date.asc,start_time.asc.nullslast,id.asc', { headers: { apikey: SB_KEY } })
       .then(function (res) { if (!res.ok) throw new Error(String(res.status)); return res.json(); })
       .then(function (data) { if (!Array.isArray(data)) { throw new Error('bad response'); } rows = data; saveCache(data); banner(''); render(); })
       .catch(function () {
