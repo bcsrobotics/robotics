@@ -57,31 +57,6 @@
   .btn{min-height:46px;padding:0 20px;border-radius:12px;font:700 16px 'Barlow Condensed',sans-serif;letter-spacing:.06em;text-transform:uppercase;border:2px solid var(--accent);background:transparent;color:var(--accent-dark);cursor:pointer;}
   .btn.primary{background:#2170b8;border-color:#2170b8;color:#fff;}
   .btn[disabled]{opacity:.4;cursor:default;}
-  .results h2{font:900 26px 'Barlow Condensed',sans-serif;text-transform:uppercase;color:var(--strong);margin-bottom:4px;}
-  .chartbox{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px 12px;margin-bottom:16px;}
-  .chartbox h3{font:800 18px 'Barlow Condensed',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--strong);margin:0 4px 8px;}
-  .chartbox svg{display:block;width:100%;height:auto;}
-  .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--text);margin:8px 4px 0;}
-  .legend i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:6px;}
-  .gline{stroke:var(--grid);stroke-width:1;}
-  .gtext{fill:var(--muted);font:12px 'Barlow',sans-serif;}
-  .bar-yes{fill:var(--yes);}
-  .bar-no{fill:var(--no);}
-  .bval{fill:var(--strong);font:700 14px 'Barlow',sans-serif;text-anchor:middle;}
-  .xl{fill:var(--strong);font:700 13px 'Barlow',sans-serif;text-anchor:middle;}
-  .xs{fill:var(--muted);font:12px 'Barlow',sans-serif;text-anchor:middle;}
-  .selbg{fill:var(--chip);}
-  .tbar{display:grid;grid-template-columns:78px 1fr;gap:4px 10px;align-items:center;margin:8px 4px;}
-  .tbar .tl{font:800 15px 'Barlow Condensed',sans-serif;letter-spacing:.05em;color:var(--strong);}
-  .track{display:flex;height:30px;border-radius:8px;overflow:hidden;background:var(--chip);}
-  .track span{display:flex;align-items:center;justify-content:center;color:#fff;font:700 14px 'Barlow',sans-serif;min-width:0;}
-  .seg-yes{background:var(--yes);} .seg-no{background:var(--no);} .seg-pend{background:var(--pend);}
-  .tsum{grid-column:2;font-size:13px;color:var(--muted);margin-top:-2px;}
-  details.nums{margin:0 4px 4px;}
-  details.nums summary{cursor:pointer;font-weight:600;color:var(--accent-dark);padding:6px 0;}
-  table{border-collapse:collapse;width:100%;font-size:14px;margin-top:6px;}
-  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);}
-  th{font-weight:700;color:var(--strong);}
   .state{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 22px;text-align:center;}
   .state h1{margin-bottom:8px;} .state p{color:var(--muted);font-size:17px;}
   .skel{height:70px;border-radius:14px;margin-bottom:10px;background:linear-gradient(90deg,var(--chip),var(--surface),var(--chip));background-size:200% 100%;animation:sh 1.3s infinite;}
@@ -106,14 +81,12 @@
   var SB_KEY = 'sb_publishable_GbnZ2QW-H72gxNnv9u8IFA_-9xSmPik';
   var code = (location.hash || '').replace(/^#/, '');
   var codeOk = /^[A-Za-z0-9]{8,64}$/.test(code);
-  var SELKEY = 'bcs_survey_sel_' + code;
-  var data = null, ans = {}, sel = 0, pending = 0, queue = {}, pollTimer = null, lastMsg = '';
+  var SELKEY = 'bcs_survey_sel_' + code, ANSKEY = 'bcs_survey_ans_' + code;
+  var data = null, sig = '', ans = {}, sel = 0, pending = 0, queue = {}, pollTimer = null, lastMsg = '';
   var roster = [];
-  var SVGNS = 'http://www.w3.org/2000/svg';
 
   function $(id) { return document.getElementById(id); }
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
-  function svg(tag, attrs, text) { var e = document.createElementNS(SVGNS, tag); Object.keys(attrs || {}).forEach(function (k) { e.setAttribute(k, attrs[k]); }); if (text != null) e.textContent = text; return e; }
   function key(o, s) { return o + '_' + s; }
   function safeUrl(u) { return /^https:\/\//i.test(u || '') ? u : null; }
   function parseD(s) { var p = String(s || '').split('-'); return p.length === 3 ? new Date(+p[0], +p[1] - 1, +p[2]) : null; }
@@ -122,14 +95,14 @@
     return fetch(SB_URL + '/rest/v1/rpc/' + name, { method: 'POST', headers: { apikey: SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (res) { return res.text().then(function (t) { var d = null; try { d = t ? JSON.parse(t) : null; } catch (e) {} if (!res.ok || d === null) throw new Error('request failed'); return d; }); });
   }
-
-  // ---------- numbers ----------
-  function counts(opt, team) {
-    var yes = 0, no = 0, total = 0;
-    (team ? [team] : data.teams).forEach(function (t) { t.students.forEach(function (s) {
-      total++; var a = ans[key(opt.id, s.id)]; if (a === 'yes') yes++; else if (a === 'no') no++;
-    }); });
-    return { yes: yes, no: no, left: total - yes - no, total: total };
+  // The server never sends answers back (they are private to the coaches).
+  // This page only remembers the choices made on THIS device, so people can see what they tapped.
+  try { ans = JSON.parse(localStorage.getItem(ANSKEY) || '{}') || {}; } catch (e) { ans = {}; }
+  function saveLocal() { try { localStorage.setItem(ANSKEY, JSON.stringify(ans)); } catch (e) {} }
+  function progress(opt, team) {
+    var n = 0, total = 0;
+    (team ? [team] : data.teams).forEach(function (t) { t.students.forEach(function (s) { total++; if (ans[key(opt.id, s.id)]) n++; }); });
+    return { n: n, total: total };
   }
 
   // ---------- states ----------
@@ -149,36 +122,38 @@
     var v = $('view'); v.textContent = '';
     roster = []; data.teams.forEach(function (t) { t.students.forEach(function (s) { roster.push(s); }); });
     v.appendChild(el('h1', '', data.title));
-    v.appendChild(el('p', 'sub', data.open ? 'Pick a tournament, then tap Yes or No next to each name. Your answers save as you tap. Tap the same button again to clear an answer.' : 'This survey is closed. You can still see the results below.'));
+    v.appendChild(el('p', 'sub', data.open
+      ? 'Pick a tournament, then tap Yes or No next to each name. Answers save as you tap and go straight to the coaches. Tap the same button again to clear an answer.'
+      : 'This survey is closed. Thank you to everyone who answered!'));
     var n = el('div', 'notice'); n.id = 'notice'; n.setAttribute('role', 'status'); n.setAttribute('aria-live', 'polite'); n.hidden = true; v.appendChild(n);
     if (!data.open) message('warn', 'This survey is closed, so answers can no longer be changed.'); else if (lastMsg) message('', lastMsg);
     if (!data.options.length) { v.appendChild(el('p', 'sub', 'No tournaments are listed yet. Please check back soon.')); return; }
     if (sel >= data.options.length) sel = 0;
-    v.appendChild(buildPicker()); v.appendChild(buildPanel()); v.appendChild(buildResults());
+    v.appendChild(buildPicker()); v.appendChild(buildPanel());
   }
   function buildPicker() {
     var box = el('div', 'picker'); box.setAttribute('role', 'group'); box.setAttribute('aria-label', 'Tournaments');
     data.options.forEach(function (o, i) {
-      var c = counts(o), b = el('button', 'pick'); b.type = 'button'; b.setAttribute('aria-pressed', String(i === sel));
+      var p = progress(o), b = el('button', 'pick'); b.type = 'button'; b.setAttribute('aria-pressed', String(i === sel));
       b.appendChild(el('span', 'pl', o.label));
       b.appendChild(el('span', 'pd', fmt(parseD(o.date), { weekday: 'short', month: 'short', day: 'numeric' })));
-      b.appendChild(el('span', 'pc', c.yes + ' yes \u00b7 ' + c.no + ' no \u00b7 ' + c.left + ' to go'));
+      b.appendChild(el('span', 'pc', p.n + ' of ' + p.total + ' answered'));
       b.addEventListener('click', function () { choose(i, false); });
       box.appendChild(b);
     });
     return box;
   }
   function buildPanel() {
-    var o = data.options[sel], c = counts(o), p = el('section', 'panel');
+    var o = data.options[sel], pr = progress(o), p = el('section', 'panel');
     var h = el('h2', '', o.label); h.id = 'panelTitle'; h.tabIndex = -1; p.appendChild(h);
     p.appendChild(el('div', 'full', o.name));
     p.appendChild(el('div', 'when', fmt(parseD(o.date), { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })));
     var u = safeUrl(o.url);
     if (u) { var a = el('a', 'evlink', 'Open the tournament page \u2197'); a.href = u; a.target = '_blank'; a.rel = 'noopener'; p.appendChild(a); }
-    p.appendChild(el('p', 'progress', (c.yes + c.no) + ' of ' + c.total + ' answered'));
+    p.appendChild(el('p', 'progress', pr.n + ' of ' + pr.total + ' answered on this device. Answers are private: only the coaches can see them.'));
     data.teams.forEach(function (t) {
-      var tc = counts(o, t), sec = el('div', 'team'), h3 = el('h3', '', t.team);
-      h3.appendChild(el('span', 'tally', tc.yes + ' yes \u00b7 ' + tc.no + ' no \u00b7 ' + tc.left + ' to go')); sec.appendChild(h3);
+      var tp = progress(o, t), sec = el('div', 'team'), h3 = el('h3', '', t.team);
+      h3.appendChild(el('span', 'tally', tp.n + ' of ' + tp.total)); sec.appendChild(h3);
       t.students.forEach(function (s) {
         var row = el('div', 'row'); row.appendChild(el('span', 'nm', s.name));
         var g = el('span'); g.setAttribute('role', 'group'); g.setAttribute('aria-label', s.name + ': can attend ' + o.label + '?'); g.style.display = 'flex'; g.style.gap = '8px';
@@ -194,7 +169,8 @@
     });
     var nav = el('div', 'navrow');
     var prev = el('button', 'btn', '\u2190 Previous'); prev.type = 'button'; prev.disabled = sel === 0; prev.addEventListener('click', function () { choose(sel - 1, true); });
-    var next = el('button', 'btn primary', sel === data.options.length - 1 ? 'All done' : 'Next tournament \u2192'); next.type = 'button'; next.disabled = sel === data.options.length - 1;
+    var last = sel === data.options.length - 1;
+    var next = el('button', 'btn primary', last ? 'All done' : 'Next tournament \u2192'); next.type = 'button'; next.disabled = last;
     next.addEventListener('click', function () { choose(sel + 1, true); });
     nav.appendChild(prev); nav.appendChild(next); p.appendChild(nav);
     return p;
@@ -205,76 +181,12 @@
     if (focus) { var h = $('panelTitle'); if (h) { h.focus(); if (h.scrollIntoView) h.scrollIntoView({ block: 'start' }); } }
   }
 
-  // ---------- charts ----------
-  function buildResults() {
-    var wrap = el('section', 'results'); wrap.appendChild(el('h2', '', 'Results so far'));
-    var c1 = el('div', 'chartbox'); c1.appendChild(el('h3', '', 'Who can go to each tournament'));
-    c1.appendChild(overallChart()); c1.appendChild(legend()); wrap.appendChild(c1);
-    var o = data.options[sel], c2 = el('div', 'chartbox'); c2.appendChild(el('h3', '', o.label + ' \u2014 by team'));
-    c2.appendChild(teamBars(o)); c2.appendChild(legend(true)); c2.appendChild(numbers()); wrap.appendChild(c2);
-    return wrap;
-  }
-  function legend(withPending) {
-    var l = el('div', 'legend');
-    [['yes', 'Yes'], ['no', 'No']].concat(withPending ? [['pend', 'Not answered yet']] : []).forEach(function (x) {
-      var s = el('span'); var i = el('i'); i.style.background = 'var(--' + x[0] + ')'; s.appendChild(i); s.appendChild(document.createTextNode(x[1])); l.appendChild(s);
-    });
-    return l;
-  }
-  function overallChart() {
-    var opts = data.options, total = roster.length, W = 680, H = 340, ml = 40, mr = 12, mt = 26, mb = 92, pw = W - ml - mr, ph = H - mt - mb;
-    var step = total <= 10 ? 2 : (total <= 30 ? 5 : 10), max = Math.max(step, Math.ceil(total / step) * step);
-    var s = svg('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'class': 'overall' });
-    s.setAttribute('aria-label', 'Bar chart of yes and no answers. ' + opts.map(function (o) { var c = counts(o); return o.label + ': ' + c.yes + ' yes, ' + c.no + ' no, ' + c.left + ' not answered'; }).join('. '));
-    var gw = pw / opts.length, bw = Math.min(42, gw * 0.3);
-    opts.forEach(function (o, i) { if (i === sel) s.appendChild(svg('rect', { 'class': 'selbg', x: ml + gw * i + 2, y: mt - 8, width: gw - 4, height: ph + mb - 2, rx: 8 })); });
-    for (var v = 0; v <= max; v += step) {
-      var y = mt + ph - (v / max) * ph;
-      s.appendChild(svg('line', { 'class': 'gline', x1: ml, x2: W - mr, y1: y, y2: y }));
-      s.appendChild(svg('text', { 'class': 'gtext', x: ml - 8, y: y + 4, 'text-anchor': 'end' }, String(v)));
-    }
-    opts.forEach(function (o, i) {
-      var c = counts(o), cx = ml + gw * i + gw / 2;
-      [['yes', c.yes, cx - bw - 3], ['no', c.no, cx + 3]].forEach(function (b) {
-        var h = (b[1] / max) * ph;
-        var r = svg('rect', { 'class': 'bar-' + b[0], x: b[2], y: mt + ph - h, width: bw, height: h, rx: 3 }); s.appendChild(r);
-        s.appendChild(svg('text', { 'class': 'bval', x: b[2] + bw / 2, y: mt + ph - h - 6 }, String(b[1])));
-      });
-      var parts = String(o.label).split(' \u00b7 '), ty = mt + ph + 20;
-      parts.forEach(function (p, k) { s.appendChild(svg('text', { 'class': 'xl', x: cx, y: ty + k * 15 }, p)); });
-      ty += parts.length * 15;
-      s.appendChild(svg('text', { 'class': 'xs', x: cx, y: ty + 1 }, fmt(parseD(o.date), { month: 'short', day: 'numeric' })));
-      s.appendChild(svg('text', { 'class': 'xs', x: cx, y: ty + 16 }, c.left + ' not answered'));
-    });
-    return s;
-  }
-  function teamBars(o) {
-    var box = el('div');
-    var rowsData = [{ name: 'All teams', c: counts(o) }].concat(data.teams.map(function (t) { return { name: t.team, c: counts(o, t) }; }));
-    rowsData.forEach(function (r) {
-      var row = el('div', 'tbar'); row.appendChild(el('span', 'tl', r.name));
-      var tr = el('div', 'track'); tr.setAttribute('role', 'img'); tr.setAttribute('aria-label', r.name + ': ' + r.c.yes + ' yes, ' + r.c.no + ' no, ' + r.c.left + ' not answered');
-      [['yes', r.c.yes], ['no', r.c.no], ['pend', r.c.left]].forEach(function (x) {
-        if (!x[1]) return; var sp = el('span', 'seg-' + x[0], String(x[1])); sp.style.flexGrow = String(x[1]); sp.style.flexShrink = '1'; sp.style.flexBasis = '0px'; tr.appendChild(sp);
-      });
-      row.appendChild(tr); row.appendChild(el('span', 'tsum', r.c.yes + ' yes \u00b7 ' + r.c.no + ' no \u00b7 ' + r.c.left + ' not answered yet'));
-      box.appendChild(row);
-    });
-    return box;
-  }
-  function numbers() {
-    var d = el('details', 'nums'); d.appendChild(el('summary', '', 'Show the numbers'));
-    var t = el('table'), hd = el('tr'); ['Tournament', 'Yes', 'No', 'Not answered'].forEach(function (h) { hd.appendChild(el('th', '', h)); }); t.appendChild(hd);
-    data.options.forEach(function (o) { var c = counts(o), r = el('tr'); [o.label, c.yes, c.no, c.left].forEach(function (x) { r.appendChild(el('td', '', String(x))); }); t.appendChild(r); });
-    d.appendChild(t); return d;
-  }
-
   // ---------- answering ----------
   function answer(o, s, val) {
     if (!data.open) return;
     var k = key(o.id, s.id), prev = ans[k] || null;
     if (val === null) delete ans[k]; else ans[k] = val;
-    render(); message('', 'Saving\u2026'); pending++;
+    saveLocal(); render(); message('', 'Saving\u2026'); pending++;
     queue[k] = (queue[k] || Promise.resolve()).then(function () {
       return rpc('set_survey_answer', { p_code: code, p_option_id: o.id, p_student_id: s.id, p_answer: val });
     }).then(function (r) {
@@ -282,6 +194,7 @@
       throw r;
     }).catch(function (r) {
       if (prev === null) delete ans[k]; else ans[k] = prev;
+      saveLocal();
       if (r && r.status === 'closed') { data.open = false; render(); return; }
       render();
       message('err', r && r.status === 'not_on_roster' ? s.name + ' is no longer on the list. Please tell your coach.' : 'That did not save. Check your connection and try again.');
@@ -293,15 +206,17 @@
     if (!codeOk) { stateView('Link not valid', 'This survey link is not working. Please use the link your coach shared.'); return Promise.resolve(); }
     return rpc('get_survey', { p_code: code }).then(function (d) {
       if (d.status !== 'ok') { stateView('Link not valid', 'This survey link is not working. Please use the link your coach shared.'); return; }
-      if (quiet && pending > 0) return;                       // never overwrite an answer that is still being saved
-      data = d; ans = {}; d.answers.forEach(function (a) { ans[key(a.o, a.s)] = a.a; });
-      render(); startPolling();
+      if (quiet && pending > 0) return;
+      var s2 = JSON.stringify([d.open, d.options, d.teams]);
+      if (quiet && data && s2 === sig) return;                      // nothing changed: don't redraw under someone's finger
+      data = d; sig = s2; render(); startPolling();
     }).catch(function () {
       if (!data) stateView('Can\u2019t connect', 'Check your internet connection, then try again.', true);
       else if (!quiet) message('warn', 'Couldn\u2019t refresh. Check your connection.');
     });
   }
-  function startPolling() { if (!pollTimer) pollTimer = setInterval(function () { if (document.visibilityState === 'visible' && !pending) load(true); }, 15000); }
+  // only checks whether the survey is still open / the list of names changed
+  function startPolling() { if (!pollTimer) pollTimer = setInterval(function () { if (document.visibilityState === 'visible' && !pending) load(true); }, 30000); }
   function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && data && !pending) load(true); });
 
