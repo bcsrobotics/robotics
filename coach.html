@@ -1104,6 +1104,10 @@
           <label>Division<span class="hint">e.g. Elementary School, Middle School</span><input type="text" id="f-division" maxlength="120"></label>
         </div>
         <div class="row">
+          <label>Grade level<span class="hint">Shown on the survey pages</span><select id="f-grade"><option value="">Not set</option><option value="all">All Grade</option><option value="elementary">Elementary Only</option><option value="middle">Middle Only</option></select></label>
+          <span></span>
+        </div>
+        <div class="row">
           <label>Venue<input type="text" id="f-venue" maxlength="200"></label>
           <label>Address<span class="hint">Used for the map link</span><input type="text" id="f-address" maxlength="300"></label>
         </div>
@@ -3714,7 +3718,7 @@ var qrcode = function() {
   // ---------- Form ----------
   var fields = {
     name: 'f-name', name_zh: 'f-name-zh', event_date: 'f-date', end_date: 'f-end', start_time: 'f-time',
-    division: 'f-division', venue: 'f-venue', address: 'f-address', teams: 'f-teams',
+    division: 'f-division', grade_level: 'f-grade', venue: 'f-venue', address: 'f-address', teams: 'f-teams',
     registration_url: 'f-url', notes: 'f-notes', notes_zh: 'f-notes-zh'
   };
   function resetForm() {
